@@ -25,7 +25,7 @@ public class VehicleRemoteControllerGUI extends GuiContainer {
         this.mc.getTextureManager().bindTexture(VehicleRemoteControllerGUI.BG_TEXTURE);
         int x = (this.width - this.xSize) / 2;
         int y = (this.height - this.ySize) / 2;
-        drawTexturedModalRect(x, y, 0, 0, this.xSize, this.ySize);
+        this.drawTexturedModalRect(x, y, 0, 0, this.xSize, this.ySize);
     }
 
     @Override
