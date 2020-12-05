@@ -1,0 +1,24 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "ACA",
+        "ABA",
+        "AAA"
+    ],
+    "key": {
+        "A": {
+            "type": "forge:ore_dict",
+            "ore": "ingotBrick"
+        },
+        "B": {
+            "type": "forge:ore_dict",
+            "ore": "oc:circuitChip1"
+        },
+        "C": {
+            "item": "minecraft:bucket"
+        }
+    },
+    "result": {
+        "item": "ivremotecontrol:fluid_loader_interface"
+    }
+}

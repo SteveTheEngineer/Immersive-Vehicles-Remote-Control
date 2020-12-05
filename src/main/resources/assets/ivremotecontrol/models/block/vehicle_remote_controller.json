@@ -1,0 +1,8 @@
+{
+    "parent": "minecraft:block/cube_bottom_top",
+    "textures": {
+        "top": "ivremotecontrol:blocks/vehicle_remote_controller/top",
+        "side": "ivremotecontrol:blocks/vehicle_remote_controller/side",
+        "bottom": "ivremotecontrol:blocks/vehicle_remote_controller/bottom"
+    }
+}

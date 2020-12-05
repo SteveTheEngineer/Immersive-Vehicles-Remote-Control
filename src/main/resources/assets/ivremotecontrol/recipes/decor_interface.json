@@ -1,0 +1,24 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "ACA",
+        "ABA",
+        "AAA"
+    ],
+    "key": {
+        "A": {
+            "type": "forge:ore_dict",
+            "ore": "stone"
+        },
+        "B": {
+            "type": "forge:ore_dict",
+            "ore": "oc:circuitChip1"
+        },
+        "C": {
+            "item": "minecraft:sign"
+        }
+    },
+    "result": {
+        "item": "ivremotecontrol:decor_interface"
+    }
+}

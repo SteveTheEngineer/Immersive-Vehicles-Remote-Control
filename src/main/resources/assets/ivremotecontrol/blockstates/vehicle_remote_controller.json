@@ -1,0 +1,8 @@
+{
+    "forge_marker": 1,
+    "variants": {
+        "normal": {
+            "model": "ivremotecontrol:vehicle_remote_controller"
+        }
+    }
+}

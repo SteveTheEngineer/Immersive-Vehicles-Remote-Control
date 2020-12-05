@@ -1,0 +1,25 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "ACA",
+        "ABA",
+        "AAA"
+    ],
+    "key": {
+        "A": {
+            "type": "forge:ore_dict",
+            "ore": "ingotIron"
+        },
+        "B": {
+            "type": "forge:ore_dict",
+            "ore": "oc:circuitChip3"
+        },
+        "C": {
+            "type": "forge:ore_dict",
+            "ore": "oc:materialInterweb"
+        }
+    },
+    "result": {
+        "item": "ivremotecontrol:vehicle_remote_controller"
+    }
+}

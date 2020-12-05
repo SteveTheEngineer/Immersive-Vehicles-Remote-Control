@@ -1,0 +1,8 @@
+{
+    "parent": "minecraft:block/piston",
+    "textures": {
+        "platform": "ivremotecontrol:blocks/signal_controller_interface/front",
+        "side": "ivremotecontrol:blocks/signal_controller_interface/side",
+        "bottom": "ivremotecontrol:blocks/signal_controller_interface/back"
+    }
+}

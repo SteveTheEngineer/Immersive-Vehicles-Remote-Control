@@ -1,0 +1,24 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "AB",
+        "CC"
+    ],
+    "key": {
+        "A": {
+            "type": "forge:ore_dict",
+            "ore": "enderpearl"
+        },
+        "B": {
+            "type": "forge:ore_dict",
+            "ore": "oc:circuitChip2"
+        },
+        "C": {
+            "type": "forge:ore_dict",
+            "ore": "ingotIron"
+        }
+    },
+    "result": {
+        "item": "ivremotecontrol:vehicle_selector"
+    }
+}

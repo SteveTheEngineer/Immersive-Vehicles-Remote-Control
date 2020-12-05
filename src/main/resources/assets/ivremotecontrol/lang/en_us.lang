@@ -1,0 +1,17 @@
+itemGroup.ivremotecontrol:tab=Immersive Vehicles Remote Control
+
+item.ivremotecontrol:vehicle_selector.name=Vehicle Selector
+item.ivremotecontrol:vehicle_selector.tooltip.help0=Right click on a vehicle to select it
+item.ivremotecontrol:vehicle_selector.tooltip.help1=Sneak and right click in the air to deselect the vehicle
+item.ivremotecontrol:vehicle_selector.tooltip.entity=Selected vehicle: %s
+item.ivremotecontrol:vehicle_selector.tooltip.vehicle=Selected vehicle: %s
+
+chat.ivremotecontrol:vehicle_selector.selected=The vehicle has been selected
+chat.ivremotecontrol:vehicle_selector.select_failed=You must be the owner of the vehicle to select it
+chat.ivremotecontrol:vehicle_selector.deselected=The vehicle has been deselected
+
+tile.ivremotecontrol:vehicle_remote_controller.name=Vehicle Remote Controller
+tile.ivremotecontrol:fuel_pump_interface.name=Fuel Pump Interface
+tile.ivremotecontrol:fluid_loader_interface.name=Fluid Loader Interface
+tile.ivremotecontrol:signal_controller_interface.name=Signal Controller Interface
+tile.ivremotecontrol:decor_interface.name=Decor Interface

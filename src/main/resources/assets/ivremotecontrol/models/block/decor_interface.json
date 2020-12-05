@@ -1,0 +1,8 @@
+{
+    "parent": "minecraft:block/piston",
+    "textures": {
+        "platform": "ivremotecontrol:blocks/decor_interface/front",
+        "side": "ivremotecontrol:blocks/decor_interface/side",
+        "bottom": "ivremotecontrol:blocks/decor_interface/back"
+    }
+}

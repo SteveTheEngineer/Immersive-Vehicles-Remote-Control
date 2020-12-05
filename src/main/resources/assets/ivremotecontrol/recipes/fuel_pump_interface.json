@@ -1,0 +1,25 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "ACA",
+        "ABA",
+        "AAA"
+    ],
+    "key": {
+        "A": {
+            "type": "forge:ore_dict",
+            "ore": "ingotGold"
+        },
+        "B": {
+            "type": "forge:ore_dict",
+            "ore": "oc:circuitChip1"
+        },
+        "C": {
+            "type": "forge:ore_dict",
+            "ore": "dustRedstone"
+        }
+    },
+    "result": {
+        "item": "ivremotecontrol:fuel_pump_interface"
+    }
+}
