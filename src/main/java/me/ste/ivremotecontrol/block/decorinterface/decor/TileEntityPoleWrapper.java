@@ -5,7 +5,9 @@ import minecrafttransportsimulator.blocks.tileentities.components.ATileEntityPol
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityPole;
 import minecrafttransportsimulator.jsondefs.JSONText;
 import minecrafttransportsimulator.packets.instances.PacketTileEntityPoleChange;
+import minecrafttransportsimulator.rendering.components.ITextProvider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TileEntityPoleWrapper implements Decor {
@@ -19,8 +21,8 @@ public class TileEntityPoleWrapper implements Decor {
     @Override
     public List<String> getTextLines(ABlockBase.Axis axis) {
         ATileEntityPole_Component component = this.pole.components.get(axis);
-        if(component != null) {
-            return component.getTextLines();
+        if(component instanceof ITextProvider) {
+            return new ArrayList<>(((ITextProvider) component).getText().values());
         } else {
             return null;
         }
@@ -29,8 +31,11 @@ public class TileEntityPoleWrapper implements Decor {
     @Override
     public void setTextLines(ABlockBase.Axis axis, List<String> lines) {
         ATileEntityPole_Component component = this.pole.components.get(axis);
-        if(component != null) {
-            component.setTextLines(lines);
+        if(component instanceof ITextProvider && component.definition.rendering != null && component.definition.rendering.textObjects != null) {
+            int i = 0;
+            for(JSONText text : component.definition.rendering.textObjects) {
+                ((ITextProvider) component).getText().put(text, lines.get(i++));
+            }
         }
     }
 

@@ -17,8 +17,8 @@ buildscript {
 apply plugin: "net.minecraftforge.gradle.forge"
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
-immersiveVehiclesVersion = 3131191 // The version of Immersive Vehicles used, file id on curseforge
-version = "1.5"
+immersiveVehiclesVersion = 3180272 // The version of Immersive Vehicles used, file id on curseforge
+version = "1.8"
 group = "me.ste.ivremotecontrol" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "ivremotecontrol"
 

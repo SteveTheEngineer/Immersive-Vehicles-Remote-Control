@@ -7,12 +7,12 @@ import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.Connector;
 import li.cil.oc.api.network.Visibility;
 import li.cil.oc.api.prefab.TileEntityEnvironment;
-import mcinterface1122.BuilderEntity;
-import mcinterface1122.BuilderTileEntity;
 import minecrafttransportsimulator.baseclasses.FluidTank;
 import minecrafttransportsimulator.blocks.tileentities.components.ATileEntityBase;
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityFuelPump;
-import minecrafttransportsimulator.mcinterface.MasterLoader;
+import minecrafttransportsimulator.mcinterface.BuilderEntity;
+import minecrafttransportsimulator.mcinterface.BuilderTileEntity;
+import minecrafttransportsimulator.packets.components.InterfacePacket;
 import minecrafttransportsimulator.packets.instances.PacketTileEntityFuelPumpConnection;
 import minecrafttransportsimulator.systems.ConfigSystem;
 import minecrafttransportsimulator.vehicles.main.AEntityBase;
@@ -93,7 +93,7 @@ public class FuelPumpInterfaceTileEntity extends TileEntityEnvironment implement
         if(pump != null) {
             EntityVehicleF_Physics vehicle = pump.connectedVehicle;
             if(vehicle != null) {
-                return new Object[] {((BuilderEntity) vehicle.wrapper).getUniqueID().toString(), vehicle.uniqueUUID};
+                return new Object[] {vehicle.wrapper.entity.getUniqueID().toString(), vehicle.uniqueUUID};
             }
         }
         return new Object[] {};
@@ -116,7 +116,7 @@ public class FuelPumpInterfaceTileEntity extends TileEntityEnvironment implement
                 }
             }
             if(vehicle != null) {
-                return new Object[] {((BuilderEntity) vehicle.wrapper).getUniqueID(), vehicle.uniqueUUID};
+                return new Object[] {vehicle.wrapper.entity.getUniqueID(), vehicle.uniqueUUID};
             }
         }
         return new Object[] {};
@@ -147,7 +147,7 @@ public class FuelPumpInterfaceTileEntity extends TileEntityEnvironment implement
                                     pump.connectedVehicle = vehicle;
                                     vehicle.beingFueled = true;
                                     pump.getTank().resetAmountDispensed();
-                                    MasterLoader.networkInterface.sendToAllClients(new PacketTileEntityFuelPumpConnection(pump, true));
+                                    InterfacePacket.sendToAllClients(new PacketTileEntityFuelPumpConnection(pump, true));
                                     return new Object[] {true};
                                 }
                             }
@@ -172,7 +172,7 @@ public class FuelPumpInterfaceTileEntity extends TileEntityEnvironment implement
     public Object[] stop(Context ctx, Arguments args) {
         TileEntityFuelPump pump = this.getPump();
         if(pump != null && pump.connectedVehicle != null) {
-            MasterLoader.networkInterface.sendToAllClients(new PacketTileEntityFuelPumpConnection(pump, false));
+            InterfacePacket.sendToAllClients(new PacketTileEntityFuelPumpConnection(pump, false));
             pump.connectedVehicle.beingFueled = false;
             pump.connectedVehicle = null;
         }

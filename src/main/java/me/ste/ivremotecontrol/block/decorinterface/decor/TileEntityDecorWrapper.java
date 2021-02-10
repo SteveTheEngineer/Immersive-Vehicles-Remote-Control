@@ -5,6 +5,8 @@ import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityDecor
 import minecrafttransportsimulator.jsondefs.JSONText;
 import minecrafttransportsimulator.packets.instances.PacketTileEntityDecorTextChange;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 public class TileEntityDecorWrapper implements Decor {
@@ -17,12 +19,17 @@ public class TileEntityDecorWrapper implements Decor {
 
     @Override
     public List<String> getTextLines(ABlockBase.Axis axis) {
-        return this.decor.getTextLines();
+        return new LinkedList<>(this.decor.getText().values());
     }
 
     @Override
     public void setTextLines(ABlockBase.Axis axis, List<String> lines) {
-        this.decor.setTextLines(lines);
+        int i = 0;
+        if(this.decor.definition.rendering != null && this.decor.definition.rendering.textObjects != null) {
+            for(JSONText text : this.decor.definition.rendering.textObjects) {
+                this.decor.text.put(text, lines.get(i++));
+            }
+        }
     }
 
     @Override

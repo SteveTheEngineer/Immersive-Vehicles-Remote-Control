@@ -7,11 +7,10 @@ import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.Connector;
 import li.cil.oc.api.network.Visibility;
 import li.cil.oc.api.prefab.TileEntityEnvironment;
-import mcinterface1122.BuilderEntity;
-import mcinterface1122.BuilderTileEntity;
 import minecrafttransportsimulator.baseclasses.FluidTank;
 import minecrafttransportsimulator.blocks.tileentities.components.ATileEntityBase;
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityFluidLoader;
+import minecrafttransportsimulator.mcinterface.BuilderTileEntity;
 import minecrafttransportsimulator.vehicles.main.EntityVehicleF_Physics;
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.tileentity.TileEntity;
@@ -109,7 +108,7 @@ public class FluidLoaderInterfaceTileEntity extends TileEntityEnvironment implem
         TileEntityFluidLoader loader = this.getLoader();
         if(loader != null && loader.connectedPart != null) {
             EntityVehicleF_Physics vehicle = loader.connectedPart.vehicle;
-            return new Object[] {((BuilderEntity) vehicle.wrapper).getUniqueID().toString(), vehicle.uniqueUUID};
+            return new Object[] {vehicle.wrapper.entity.getUniqueID().toString(), vehicle.uniqueUUID};
         }
         return new Object[] {};
     }

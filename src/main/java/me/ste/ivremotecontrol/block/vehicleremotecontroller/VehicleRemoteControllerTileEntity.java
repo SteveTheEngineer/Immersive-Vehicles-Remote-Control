@@ -8,18 +8,15 @@ import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.Connector;
 import li.cil.oc.api.network.Visibility;
 import li.cil.oc.api.prefab.TileEntityEnvironment;
-import mcinterface1122.BuilderEntity;
 import me.ste.ivremotecontrol.Configuration;
 import me.ste.ivremotecontrol.IVRemoteControl;
-import me.ste.ivremotecontrol.network.ModPacketHandler;
-import me.ste.ivremotecontrol.network.VehicleDoorPacket;
 import minecrafttransportsimulator.baseclasses.BeaconManager;
 import minecrafttransportsimulator.baseclasses.FluidTank;
-import minecrafttransportsimulator.baseclasses.Point3d;
 import minecrafttransportsimulator.jsondefs.JSONText;
 import minecrafttransportsimulator.jsondefs.JSONVehicle;
-import minecrafttransportsimulator.mcinterface.IWrapperEntity;
-import minecrafttransportsimulator.mcinterface.MasterLoader;
+import minecrafttransportsimulator.mcinterface.BuilderEntity;
+import minecrafttransportsimulator.mcinterface.WrapperEntity;
+import minecrafttransportsimulator.packets.components.InterfacePacket;
 import minecrafttransportsimulator.packets.instances.*;
 import minecrafttransportsimulator.rendering.components.LightType;
 import minecrafttransportsimulator.vehicles.main.AEntityBase;
@@ -35,6 +32,7 @@ import net.minecraft.util.ITickable;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -268,10 +266,10 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
             List<Map<String, Object>> passengers = new ArrayList<>();
-            for(IWrapperEntity entity : vehicle.locationRiderMap.values()) {
+            for(WrapperEntity entity : vehicle.locationRiderMap.values()) {
                 Map<String, Object> passenger = new HashMap<>();
-                passenger.put("uuid", ((BuilderEntity) entity).getUniqueID().toString());
-                passenger.put("name", ((BuilderEntity) entity).getName());
+                passenger.put("uuid", entity.entity.getUniqueID().toString());
+                passenger.put("name", entity.entity.getName());
                 passengers.add(passenger);
             }
             return new Object[] {passengers};
@@ -284,7 +282,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
             vehicle.throttle = (byte) (Math.max(0, Math.min(1, args.checkDouble(0))) * (double) EntityVehicleF_Physics.MAX_THROTTLE);
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlAnalog(vehicle, PacketVehicleControlAnalog.Controls.THROTTLE, vehicle.throttle, Byte.MAX_VALUE));
+            InterfacePacket.sendToAllClients(new PacketVehicleControlAnalog(vehicle, PacketVehicleControlAnalog.Controls.THROTTLE, vehicle.throttle, Byte.MAX_VALUE));
         }
         return new Object[] {};
     }
@@ -303,7 +301,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
             vehicle.brake = (byte) (Math.max(0, Math.min(1, args.checkDouble(0))) * (double) EntityVehicleF_Physics.MAX_BRAKE);
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlAnalog(vehicle, PacketVehicleControlAnalog.Controls.BRAKE, vehicle.brake, Byte.MAX_VALUE));
+            InterfacePacket.sendToAllClients(new PacketVehicleControlAnalog(vehicle, PacketVehicleControlAnalog.Controls.BRAKE, vehicle.brake, Byte.MAX_VALUE));
         }
         return new Object[] {};
     }
@@ -322,7 +320,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
             vehicle.parkingBrakeOn = args.checkBoolean(0);
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.P_BRAKE, vehicle.parkingBrakeOn));
+            InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.P_BRAKE, vehicle.parkingBrakeOn));
         }
         return new Object[] {};
     }
@@ -344,10 +342,10 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
             if(engine != null) {
                 boolean status = args.checkBoolean(1);
                 engine.setMagnetoStatus(status);
-                MasterLoader.networkInterface.sendToAllClients(new PacketVehiclePartEngine(engine, status ? PacketVehiclePartEngine.Signal.MAGNETO_ON : PacketVehiclePartEngine.Signal.MAGNETO_OFF));
+                InterfacePacket.sendToAllClients(new PacketVehiclePartEngine(engine, status ? PacketVehiclePartEngine.Signal.MAGNETO_ON : PacketVehiclePartEngine.Signal.MAGNETO_OFF));
                 if(engine.state.magnetoOn && engine.state.esOn) {
                     engine.setElectricStarterStatus(false);
-                    MasterLoader.networkInterface.sendToAllClients(new PacketVehiclePartEngine(engine, PacketVehiclePartEngine.Signal.ES_OFF));
+                    InterfacePacket.sendToAllClients(new PacketVehiclePartEngine(engine, PacketVehiclePartEngine.Signal.ES_OFF));
                 }
             }
         }
@@ -363,7 +361,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
                 if(engine.state.magnetoOn) {
                     boolean status = args.checkBoolean(1);
                     engine.setElectricStarterStatus(status);
-                    MasterLoader.networkInterface.sendToAllClients(new PacketVehiclePartEngine(engine, status ? PacketVehiclePartEngine.Signal.ES_ON : PacketVehiclePartEngine.Signal.ES_OFF));
+                    InterfacePacket.sendToAllClients(new PacketVehiclePartEngine(engine, status ? PacketVehiclePartEngine.Signal.ES_ON : PacketVehiclePartEngine.Signal.ES_OFF));
                 }
             }
         }
@@ -379,7 +377,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
                 shifted = engine.shiftUp(false);
             }
             if(shifted) {
-                MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.SHIFT_UP, true));
+                InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.SHIFT_UP, true));
             }
         }
         return new Object[] {};
@@ -394,7 +392,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
                 shifted = engine.shiftDown(false);
             }
             if(shifted) {
-                MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.SHIFT_DN, true));
+                InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.SHIFT_DN, true));
             }
         }
         return new Object[] {};
@@ -408,12 +406,12 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
             boolean state = args.checkBoolean(1);
             try {
                 LightType type = LightType.valueOf(name.toUpperCase());
-                if (!vehicle.lightsOn.contains(type) && state) {
-                    vehicle.lightsOn.add(type);
-                    MasterLoader.networkInterface.sendToAllClients(new PacketVehicleLightToggle(vehicle, type));
-                } else if (vehicle.lightsOn.contains(type) && !state) {
-                    vehicle.lightsOn.remove(type);
-                    MasterLoader.networkInterface.sendToAllClients(new PacketVehicleLightToggle(vehicle, type));
+                if (!vehicle.variablesOn.contains(type.lowercaseName) && state) {
+                    vehicle.variablesOn.add(type.lowercaseName);
+                    InterfacePacket.sendToAllClients(new PacketVehicleVariableToggle(vehicle, type.lowercaseName));
+                } else if (vehicle.variablesOn.contains(type.lowercaseName) && !state) {
+                    vehicle.variablesOn.remove(type.lowercaseName);
+                    InterfacePacket.sendToAllClients(new PacketVehicleVariableToggle(vehicle, type.lowercaseName));
                 }
             } catch(IllegalArgumentException ignored) {}
         }
@@ -425,7 +423,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
             try {
-                return new Object[] {vehicle.lightsOn.contains(LightType.valueOf(args.checkString(0)))};
+                return new Object[] {vehicle.variablesOn.contains(LightType.valueOf(args.checkString(0)).lowercaseName)};
             } catch(IllegalArgumentException ignored) {}
         }
         return new Object[] {};
@@ -435,11 +433,11 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
     public Object[] getLightsOn(Context ctx, Arguments args) {
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
-            String[] lightsOn = new String[vehicle.lightsOn.size()];
-            int i = 0;
-            for(LightType lightType : vehicle.lightsOn) {
-                lightsOn[i] = lightType.name();
-                i++;
+            Set<String> lightsOn = new HashSet<>();
+            for(LightType type : LightType.values()) {
+                if(vehicle.variablesOn.contains(type.lowercaseName)) {
+                    lightsOn.add(type.name());
+                }
             }
             return new Object[] {lightsOn};
         }
@@ -452,16 +450,18 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         if(vehicle != null) {
             String name = args.checkString(0);
             boolean open = args.checkBoolean(1);
-            for(JSONVehicle.VehicleDoor door : vehicle.definition.doors) {
-                if(door.name.equals(name)) {
-                    if (!vehicle.doorsOpen.contains(name) && open) {
-                        vehicle.doorsOpen.add(name);
-                        ModPacketHandler.INSTANCE.sendToAll(new VehicleDoorPacket(vehicle, name));
-                    } else if (vehicle.doorsOpen.contains(name) && !open) {
-                        vehicle.doorsOpen.remove(name);
-                        ModPacketHandler.INSTANCE.sendToAll(new VehicleDoorPacket(vehicle, name));
+            if(vehicle.definition.doors != null) {
+                for(JSONVehicle.VehicleDoor door : vehicle.definition.doors) {
+                    if(door.name.equals(name)) {
+                        if (!vehicle.variablesOn.contains(name) && open) {
+                            vehicle.variablesOn.add(name);
+                            InterfacePacket.sendToAllClients(new PacketVehicleVariableToggle(vehicle, name));
+                        } else if (vehicle.variablesOn.contains(name) && !open) {
+                            vehicle.variablesOn.remove(name);
+                            InterfacePacket.sendToAllClients(new PacketVehicleVariableToggle(vehicle, name));
+                        }
+                        break;
                     }
-                    break;
                 }
             }
         }
@@ -473,7 +473,11 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
             try {
-                return new Object[] {vehicle.doorsOpen.contains(args.checkString(0))};
+                for(JSONVehicle.VehicleDoor door : vehicle.definition.doors) {
+                    if (door.name.equals(args.checkString(0))) {
+                        return new Object[] {vehicle.variablesOn.contains(door.name)};
+                    }
+                }
             } catch(IllegalArgumentException ignored) {}
         }
         return new Object[] {};
@@ -483,7 +487,13 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
     public Object[] getDoorsOpen(Context ctx, Arguments args) {
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
-            return new Object[] {vehicle.doorsOpen.toArray(new String[0])};
+            Set<String> doorsOpen = new HashSet<>();
+            for(JSONVehicle.VehicleDoor door : vehicle.definition.doors) {
+                if(vehicle.variablesOn.contains(door.name)) {
+                    doorsOpen.add(door.name);
+                }
+            }
+            return new Object[] {doorsOpen};
         }
         return new Object[] {};
     }
@@ -509,7 +519,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
             if(vehicle.cruiseControl) {
                 vehicle.cruiseControlSpeed = vehicle.velocity;
             }
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.CRUISECONTROL, vehicle.cruiseControl));
+            InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.CRUISECONTROL, vehicle.cruiseControl));
         }
         return new Object[] {};
     }
@@ -528,7 +538,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
             vehicle.hornOn = args.checkBoolean(0);
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.HORN, vehicle.hornOn));
+            InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.HORN, vehicle.hornOn));
         }
         return new Object[] {};
     }
@@ -547,7 +557,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
             vehicle.sirenOn = args.checkBoolean(0);
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.SIREN, vehicle.sirenOn));
+            InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.SIREN, vehicle.sirenOn));
         }
         return new Object[] {};
     }
@@ -579,7 +589,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
             } else {
                 vehicle.reverseThrust = state;
             }
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.REVERSE, state));
+            InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.REVERSE, state));
         }
         return new Object[] {};
     }
@@ -599,7 +609,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         if(vehicle != null) {
             vehicle.autopilot = args.checkBoolean(0);
             vehicle.altitudeSetting = vehicle.position.y;
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.AUTOPILOT, vehicle.autopilot));
+            InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.AUTOPILOT, vehicle.autopilot));
         }
         return new Object[] {};
     }
@@ -618,7 +628,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
             vehicle.flapDesiredAngle = (short) Math.min(EntityVehicleF_Physics.MAX_FLAP_ANGLE, vehicle.flapDesiredAngle + IVRemoteControl.FLAPS_STEP);
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.FLAPS, true));
+            InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.FLAPS, true));
         }
         return new Object[] {};
     }
@@ -628,7 +638,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
             vehicle.flapDesiredAngle = (short) Math.max(IVRemoteControl.MIN_FLAPS_ANGLE, vehicle.flapDesiredAngle - IVRemoteControl.FLAPS_STEP);
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.FLAPS, true));
+            InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.FLAPS, true));
         }
         return new Object[] {};
     }
@@ -646,8 +656,8 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
     public Object[] increaseAileronTrim(Context ctx, Arguments args) {
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
-            vehicle.aileronTrim = (short) Math.min(IVRemoteControl.MAX_AILERON_TRIM, vehicle.aileronTrim + IVRemoteControl.AILERON_TRIM_STEP);
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.TRIM_ROLL, true));
+            vehicle.aileronTrim = (short) Math.min(EntityVehicleF_Physics.MAX_AILERON_TRIM, vehicle.aileronTrim + IVRemoteControl.AILERON_TRIM_STEP);
+            InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.TRIM_ROLL, true));
         }
         return new Object[] {};
     }
@@ -656,8 +666,8 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
     public Object[] decreaseAileronTrim(Context ctx, Arguments args) {
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
-            vehicle.aileronTrim = (short) Math.max(-IVRemoteControl.MAX_AILERON_TRIM, vehicle.aileronTrim - IVRemoteControl.AILERON_TRIM_STEP);
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.TRIM_ROLL, false));
+            vehicle.aileronTrim = (short) Math.max(-EntityVehicleF_Physics.MAX_AILERON_TRIM, vehicle.aileronTrim - IVRemoteControl.AILERON_TRIM_STEP);
+            InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.TRIM_ROLL, false));
         }
         return new Object[] {};
     }
@@ -671,7 +681,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
             short oldAngle = vehicle.aileronAngle;
             vehicle.aileronAngle = angle;
             vehicle.aileronCooldown = cooldown;
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlAnalog(vehicle, PacketVehicleControlAnalog.Controls.AILERON, vehicle.aileronCooldown != Byte.MAX_VALUE ? (short) (vehicle.aileronAngle - oldAngle) : vehicle.aileronAngle, vehicle.aileronCooldown));
+            InterfacePacket.sendToAllClients(new PacketVehicleControlAnalog(vehicle, PacketVehicleControlAnalog.Controls.AILERON, vehicle.aileronCooldown != Byte.MAX_VALUE ? (short) (vehicle.aileronAngle - oldAngle) : vehicle.aileronAngle, vehicle.aileronCooldown));
         }
         return new Object[] {};
     }
@@ -693,8 +703,8 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
     public Object[] increaseElevatorTrim(Context ctx, Arguments args) {
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
-            vehicle.elevatorTrim = (short) Math.min(IVRemoteControl.MAX_ELEVATOR_TRIM, vehicle.elevatorTrim + IVRemoteControl.ELEVATOR_TRIM_STEP);
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.TRIM_PITCH, true));
+            vehicle.elevatorTrim = (short) Math.min(EntityVehicleF_Physics.MAX_ELEVATOR_TRIM, vehicle.elevatorTrim + IVRemoteControl.ELEVATOR_TRIM_STEP);
+            InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.TRIM_PITCH, true));
         }
         return new Object[] {};
     }
@@ -703,8 +713,8 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
     public Object[] decreaseElevatorTrim(Context ctx, Arguments args) {
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
-            vehicle.elevatorTrim = (short) Math.max(-IVRemoteControl.MAX_ELEVATOR_TRIM, vehicle.elevatorTrim - IVRemoteControl.ELEVATOR_TRIM_STEP);
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.TRIM_PITCH, false));
+            vehicle.elevatorTrim = (short) Math.max(-EntityVehicleF_Physics.MAX_ELEVATOR_TRIM, vehicle.elevatorTrim - IVRemoteControl.ELEVATOR_TRIM_STEP);
+            InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.TRIM_PITCH, false));
         }
         return new Object[] {};
     }
@@ -718,7 +728,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
             short oldAngle = vehicle.elevatorAngle;
             vehicle.elevatorAngle = angle;
             vehicle.elevatorCooldown = cooldown;
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlAnalog(vehicle, PacketVehicleControlAnalog.Controls.ELEVATOR, vehicle.elevatorCooldown != Byte.MAX_VALUE ? (short) (vehicle.elevatorAngle - oldAngle) : vehicle.elevatorAngle, vehicle.elevatorCooldown));
+            InterfacePacket.sendToAllClients(new PacketVehicleControlAnalog(vehicle, PacketVehicleControlAnalog.Controls.ELEVATOR, vehicle.elevatorCooldown != Byte.MAX_VALUE ? (short) (vehicle.elevatorAngle - oldAngle) : vehicle.elevatorAngle, vehicle.elevatorCooldown));
         }
         return new Object[] {};
     }
@@ -740,8 +750,8 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
     public Object[] increaseRudderTrim(Context ctx, Arguments args) {
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
-            vehicle.rudderTrim = (short) Math.min(IVRemoteControl.MAX_RUDDER_TRIM, vehicle.rudderTrim + IVRemoteControl.RUDDER_TRIM_STEP);
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.TRIM_YAW, true));
+            vehicle.rudderTrim = (short) Math.min(EntityVehicleF_Physics.MAX_RUDDER_TRIM, vehicle.rudderTrim + IVRemoteControl.RUDDER_TRIM_STEP);
+            InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.TRIM_YAW, true));
         }
         return new Object[] {};
     }
@@ -750,8 +760,8 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
     public Object[] decreaseRudderTrim(Context ctx, Arguments args) {
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
-            vehicle.rudderTrim = (short) Math.max(-IVRemoteControl.MAX_RUDDER_TRIM, vehicle.rudderTrim - IVRemoteControl.RUDDER_TRIM_STEP);
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.TRIM_YAW, false));
+            vehicle.rudderTrim = (short) Math.max(-EntityVehicleF_Physics.MAX_RUDDER_TRIM, vehicle.rudderTrim - IVRemoteControl.RUDDER_TRIM_STEP);
+            InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.TRIM_YAW, false));
         }
         return new Object[] {};
     }
@@ -765,7 +775,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
             short oldAngle = vehicle.rudderAngle;
             vehicle.rudderAngle = angle;
             vehicle.rudderCooldown = cooldown;
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlAnalog(vehicle, PacketVehicleControlAnalog.Controls.RUDDER, vehicle.rudderCooldown != Byte.MAX_VALUE ? (short) (vehicle.rudderAngle - oldAngle) : vehicle.rudderAngle, vehicle.rudderCooldown));
+            InterfacePacket.sendToAllClients(new PacketVehicleControlAnalog(vehicle, PacketVehicleControlAnalog.Controls.RUDDER, vehicle.rudderCooldown != Byte.MAX_VALUE ? (short) (vehicle.rudderAngle - oldAngle) : vehicle.rudderAngle, vehicle.rudderCooldown));
         }
         return new Object[] {};
     }
@@ -788,7 +798,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
             vehicle.gearUpCommand = args.checkBoolean(0);
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.GEAR, vehicle.gearUpCommand));
+            InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.GEAR, vehicle.gearUpCommand));
         }
         return new Object[] {};
     }
@@ -808,14 +818,19 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         if(vehicle != null) {
             String name = args.checkString(0);
             boolean state = args.checkBoolean(1);
-            boolean modified = state != vehicle.customsOn.contains(name);
-            if(state) {
-                vehicle.customsOn.add(name);
-            } else {
-                vehicle.customsOn.remove(name);
-            }
-            if(modified) {
-                MasterLoader.networkInterface.sendToAllClients(new PacketVehicleCustomToggle(vehicle, name));
+            if(vehicle.definition.rendering.customVariables != null) {
+                for(String variable : vehicle.definition.rendering.customVariables) {
+                    if(variable.equals(name)) {
+                        if (!vehicle.variablesOn.contains(name) && state) {
+                            vehicle.variablesOn.add(name);
+                            InterfacePacket.sendToAllClients(new PacketVehicleVariableToggle(vehicle, name));
+                        } else if (vehicle.variablesOn.contains(name) && !state) {
+                            vehicle.variablesOn.remove(name);
+                            InterfacePacket.sendToAllClients(new PacketVehicleVariableToggle(vehicle, name));
+                        }
+                        break;
+                    }
+                }
             }
         }
         return new Object[] {};
@@ -825,44 +840,10 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
     public Object[] getCustom(Context ctx, Arguments args) {
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
-            return new Object[] {vehicle.customsOn.contains(args.checkString(0))};
-        }
-        return new Object[] {};
-    }
-
-    @Callback(direct = true, doc = "function(): table -- get all vehicle's active custom states")
-    public Object[] getCustomsOn(Context ctx, Arguments args) {
-        EntityVehicleF_Physics vehicle = this.getVehicle();
-        if(vehicle != null) {
-            return new Object[] {vehicle.customsOn};
-        }
-        return new Object[] {};
-    }
-
-    @Callback(doc = "function(): boolean -- attach a trailer to the vehicle. Returns true if a trailer was attached")
-    public Object[] attachTrailer(Context ctx, Arguments args) {
-        EntityVehicleF_Physics vehicle = this.getVehicle();
-        if(vehicle != null) {
-            if(vehicle.towedVehicle == null && vehicle.definition.motorized.hitchPos != null) {
-                for(AEntityBase entity : AEntityBase.createdServerEntities) {
-                    if(!entity.equals(vehicle) && entity instanceof EntityVehicleF_Physics) {
-                        EntityVehicleF_Physics target = (EntityVehicleF_Physics) entity;
-                        if(target.definition.motorized.hookupPos != null) {
-                            Point3d hitchPos = vehicle.definition.motorized.hitchPos.copy().rotateCoarse(vehicle.angles).add(vehicle.position);
-                            Point3d hookupPos = target.definition.motorized.hookupPos.copy().rotateCoarse(target.angles).add(target.position);
-                            if(hitchPos.distanceTo(hookupPos) < 2) {
-                                for(String type : vehicle.definition.motorized.hitchTypes)  {
-                                    if(type.equals(target.definition.motorized.hookupType)) {
-                                        target.towedByVehicle = vehicle;
-                                        vehicle.towedVehicle = target;
-                                        target.parkingBrakeOn = false;
-                                        MasterLoader.networkInterface.sendToAllClients(new PacketVehicleTrailerChange(vehicle));
-                                        return new Object[] {true};
-                                    }
-                                }
-                                break;
-                            }
-                        }
+            if(vehicle.definition.rendering.customVariables != null) {
+                for(String variable : vehicle.definition.rendering.customVariables) {
+                    if (variable.equals(args.checkString(0))) {
+                        return new Object[] {vehicle.variablesOn.contains(variable)};
                     }
                 }
             }
@@ -871,18 +852,55 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         return new Object[] {};
     }
 
+    @Callback(direct = true, doc = "function(): table -- get all vehicle's active custom states")
+    public Object[] getCustomsOn(Context ctx, Arguments args) {
+        EntityVehicleF_Physics vehicle = this.getVehicle();
+        if(vehicle != null) {
+            Set<String> customsOn = new HashSet<>();
+            if(vehicle.definition.rendering.customVariables != null) {
+                for(String variable : vehicle.definition.rendering.customVariables) {
+                    if (variable.equals(args.checkString(0)) && vehicle.variablesOn.contains(variable)) {
+                        customsOn.add(variable);
+                    }
+                }
+            }
+            return new Object[] {customsOn};
+        }
+        return new Object[] {};
+    }
+
+    @Callback(doc = "function(): boolean,string|table,string? -- attach a trailer to the vehicle. Returns true, trailer entity uuid and trailer uuid if a trailer was attached, or false and the errors otherwise")
+    public Object[] attachTrailer(Context ctx, Arguments args) {
+        EntityVehicleF_Physics vehicle = this.getVehicle();
+        if(vehicle != null) {
+            Set<String> errors = new HashSet<>();
+            if(vehicle.towedVehicle == null) {
+                for(AEntityBase entity : AEntityBase.createdServerEntities) {
+                    if(entity instanceof EntityVehicleF_Physics && !entity.equals(vehicle)) {
+                        EntityVehicleF_Physics.TrailerConnectionResult result = vehicle.tryToConnect((EntityVehicleF_Physics) entity);
+                        if(result == EntityVehicleF_Physics.TrailerConnectionResult.TRAILER_CONNECTED) {
+                            return new Object[] {true, vehicle.towedVehicle.uniqueUUID};
+                        } else {
+                            errors.add(StringUtils.capitalize(result.name().replace('_', ' ').toLowerCase()));
+                        }
+                    }
+                }
+            }
+            return new Object[] {false, errors};
+        }
+        return new Object[] {};
+    }
+
     @Callback(doc = "function(): boolean -- detach the vehicle trailer. Returns true if a trailer was detached")
     public Object[] detachTrailer(Context ctx, Arguments args) {
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
-            boolean hasTrailer = vehicle.towedVehicle != null;
-            if(hasTrailer) {
-                vehicle.towedVehicle.towedByVehicle = null;
-                vehicle.towedVehicle.parkingBrakeOn = true;
-                vehicle.towedVehicle = null;
-                MasterLoader.networkInterface.sendToAllClients(new PacketVehicleTrailerChange(vehicle));
+            if(vehicle.towedVehicle != null) {
+                vehicle.changeTrailer(null, null, null, null, null);
+                return new Object[] {true};
+            } else {
+                return new Object[] {false};
             }
-            return new Object[] {hasTrailer};
         }
         return new Object[] {};
     }
@@ -891,20 +909,16 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
     public Object[] getText(Context ctx, Arguments args) {
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
-            int i = 0;
             Map<String, String> lines = new HashMap<>();
             if(vehicle.definition.rendering.textObjects != null) {
                 for(JSONText text : vehicle.definition.rendering.textObjects) {
-                    lines.put(text.fieldName, vehicle.textLines.get(i++));
-                }
-                if(i > 0) {
-                    i--;
+                    lines.put(text.fieldName, vehicle.text.get(text));
                 }
             }
             for(APart part : vehicle.parts) {
                 if(part.definition.rendering != null && part.definition.rendering.textObjects != null) {
                     for(JSONText text : part.definition.rendering.textObjects) {
-                        lines.put(text.fieldName, part.textLines.get(i++));
+                        lines.put(text.fieldName, part.text.get(text));
                     }
                 }
             }
@@ -920,33 +934,27 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
             String name = args.checkString(0);
             String text = args.checkString(1);
 
-            int i = 0;
             List<String> textLines = new ArrayList<>();
             if(vehicle.definition.rendering.textObjects != null) {
                 for(JSONText textDef : vehicle.definition.rendering.textObjects) {
                     if(textDef.fieldName.equals(name)) {
-                        vehicle.textLines.set(i, text.substring(0, Math.min(textDef.maxLength, text.length())));
+                        vehicle.text.put(textDef, text.substring(0, Math.min(textDef.maxLength, text.length())));
                     }
-                    textLines.add(vehicle.textLines.get(i));
-                    i++;
-                }
-                if(i > 0) {
-                    i--;
+                    textLines.add(vehicle.text.get(textDef));
                 }
             }
             for(APart part : vehicle.parts) {
                 if(part.definition.rendering != null && part.definition.rendering.textObjects != null) {
                     for(JSONText textDef : part.definition.rendering.textObjects) {
                         if(textDef.fieldName.equals(name)) {
-                            part.textLines.set(i, text.substring(0, Math.min(textDef.maxLength, text.length())));
+                            part.text.put(textDef, text.substring(0, Math.min(textDef.maxLength, text.length())));
                         }
-                        textLines.add(vehicle.textLines.get(i));
-                        i++;
+                        textLines.add(vehicle.text.get(textDef));
                     }
                 }
             }
 
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleTextChange(vehicle, textLines));
+            InterfacePacket.sendToAllClients(new PacketVehicleTextChange(vehicle, textLines));
         }
         return new Object[] {};
     }
@@ -966,7 +974,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         if(vehicle != null) {
             vehicle.selectedBeaconName = args.checkString(0);
             vehicle.selectedBeacon = BeaconManager.getBeacon(vehicle.world, vehicle.selectedBeaconName);
-            MasterLoader.networkInterface.sendToAllClients(new PacketVehicleBeaconChange(vehicle, vehicle.selectedBeaconName));
+            InterfacePacket.sendToAllClients(new PacketVehicleBeaconChange(vehicle, vehicle.selectedBeaconName));
         }
         return new Object[] {};
     }
@@ -987,24 +995,24 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
 
         Map<String, Object> aileron = new HashMap<>();
         aileron.put("dampenRate", EntityVehicleF_Physics.AILERON_DAMPEN_RATE / IVRemoteControl.AILERON_ANGLE_STEP);
-        aileron.put("trimMin", -IVRemoteControl.MAX_AILERON_TRIM / IVRemoteControl.AILERON_TRIM_STEP);
-        aileron.put("trimMax", IVRemoteControl.MAX_AILERON_TRIM / IVRemoteControl.AILERON_TRIM_STEP);
+        aileron.put("trimMin", -EntityVehicleF_Physics.MAX_AILERON_TRIM / IVRemoteControl.AILERON_TRIM_STEP);
+        aileron.put("trimMax", EntityVehicleF_Physics.MAX_AILERON_TRIM / IVRemoteControl.AILERON_TRIM_STEP);
         aileron.put("angleMin", -EntityVehicleF_Physics.MAX_AILERON_ANGLE / IVRemoteControl.AILERON_ANGLE_STEP);
         aileron.put("angleMax", EntityVehicleF_Physics.MAX_AILERON_ANGLE / IVRemoteControl.AILERON_ANGLE_STEP);
         table.put("aileron", aileron);
 
         Map<String, Object> elevator = new HashMap<>();
         elevator.put("dampenRate", EntityVehicleF_Physics.ELEVATOR_DAMPEN_RATE / IVRemoteControl.ELEVATOR_ANGLE_STEP);
-        elevator.put("trimMin", -IVRemoteControl.MAX_ELEVATOR_TRIM / IVRemoteControl.ELEVATOR_TRIM_STEP);
-        elevator.put("trimMax", IVRemoteControl.MAX_ELEVATOR_TRIM / IVRemoteControl.ELEVATOR_TRIM_STEP);
+        elevator.put("trimMin", -EntityVehicleF_Physics.MAX_ELEVATOR_TRIM / IVRemoteControl.ELEVATOR_TRIM_STEP);
+        elevator.put("trimMax", EntityVehicleF_Physics.MAX_ELEVATOR_TRIM / IVRemoteControl.ELEVATOR_TRIM_STEP);
         elevator.put("angleMin", -EntityVehicleF_Physics.MAX_ELEVATOR_ANGLE / IVRemoteControl.ELEVATOR_ANGLE_STEP);
         elevator.put("angleMax", EntityVehicleF_Physics.MAX_ELEVATOR_ANGLE / IVRemoteControl.ELEVATOR_ANGLE_STEP);
         table.put("elevator", elevator);
 
         Map<String, Object> rudder = new HashMap<>();
         rudder.put("dampenRate", EntityVehicleF_Physics.RUDDER_DAMPEN_RATE / IVRemoteControl.RUDDER_ANGLE_STEP);
-        rudder.put("trimMin", -IVRemoteControl.MAX_RUDDER_TRIM / IVRemoteControl.RUDDER_TRIM_STEP);
-        rudder.put("trimMax", IVRemoteControl.MAX_RUDDER_TRIM / IVRemoteControl.RUDDER_TRIM_STEP);
+        rudder.put("trimMin", -EntityVehicleF_Physics.MAX_RUDDER_TRIM / IVRemoteControl.RUDDER_TRIM_STEP);
+        rudder.put("trimMax", EntityVehicleF_Physics.MAX_RUDDER_TRIM / IVRemoteControl.RUDDER_TRIM_STEP);
         rudder.put("angleMin", -EntityVehicleF_Physics.MAX_RUDDER_ANGLE / IVRemoteControl.RUDDER_ANGLE_STEP);
         rudder.put("angleMax", EntityVehicleF_Physics.MAX_RUDDER_ANGLE / IVRemoteControl.RUDDER_ANGLE_STEP);
         table.put("rudder", rudder);

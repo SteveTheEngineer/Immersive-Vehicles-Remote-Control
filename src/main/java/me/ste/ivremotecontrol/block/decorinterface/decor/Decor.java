@@ -2,9 +2,9 @@ package me.ste.ivremotecontrol.block.decorinterface.decor;
 
 import minecrafttransportsimulator.blocks.components.ABlockBase;
 import minecrafttransportsimulator.jsondefs.JSONText;
-import minecrafttransportsimulator.packets.components.APacketBase;
 import minecrafttransportsimulator.packets.components.APacketTileEntity;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface Decor {

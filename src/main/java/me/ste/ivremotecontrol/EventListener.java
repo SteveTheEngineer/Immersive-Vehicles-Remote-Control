@@ -1,6 +1,5 @@
 package me.ste.ivremotecontrol;
 
-import mcinterface1122.BuilderEntity;
 import me.ste.ivremotecontrol.block.decorinterface.DecorInterfaceBlock;
 import me.ste.ivremotecontrol.block.decorinterface.DecorInterfaceTileEntity;
 import me.ste.ivremotecontrol.block.fluidloaderinterface.FluidLoaderInterfaceBlock;
@@ -12,6 +11,7 @@ import me.ste.ivremotecontrol.block.signalcontrollerinterface.SignalControllerIn
 import me.ste.ivremotecontrol.block.vehicleremotecontroller.VehicleRemoteControllerBlock;
 import me.ste.ivremotecontrol.block.vehicleremotecontroller.VehicleRemoteControllerTileEntity;
 import me.ste.ivremotecontrol.item.VehicleSelectorItem;
+import minecrafttransportsimulator.mcinterface.BuilderEntity;
 import minecrafttransportsimulator.vehicles.main.AEntityBase;
 import minecrafttransportsimulator.vehicles.main.EntityVehicleF_Physics;
 import net.minecraft.block.Block;

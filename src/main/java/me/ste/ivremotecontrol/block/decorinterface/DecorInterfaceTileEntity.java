@@ -7,20 +7,16 @@ import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.Connector;
 import li.cil.oc.api.network.Visibility;
 import li.cil.oc.api.prefab.TileEntityEnvironment;
-import mcinterface1122.BuilderEntity;
-import mcinterface1122.BuilderTileEntity;
 import me.ste.ivremotecontrol.block.decorinterface.decor.Decor;
 import me.ste.ivremotecontrol.block.decorinterface.decor.TileEntityDecorWrapper;
 import me.ste.ivremotecontrol.block.decorinterface.decor.TileEntityPoleWrapper;
-import minecrafttransportsimulator.baseclasses.FluidTank;
 import minecrafttransportsimulator.blocks.components.ABlockBase;
 import minecrafttransportsimulator.blocks.tileentities.components.ATileEntityBase;
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityDecor;
-import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityFluidLoader;
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityPole;
 import minecrafttransportsimulator.jsondefs.JSONText;
-import minecrafttransportsimulator.mcinterface.MasterLoader;
-import minecrafttransportsimulator.vehicles.main.EntityVehicleF_Physics;
+import minecrafttransportsimulator.mcinterface.BuilderTileEntity;
+import minecrafttransportsimulator.packets.components.InterfacePacket;
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
@@ -165,7 +161,7 @@ public class DecorInterfaceTileEntity extends TileEntityEnvironment implements I
                     textLines.set(i++, text.substring(0, Math.min(textDef.maxLength, text.length())));
                 }
             }
-            MasterLoader.networkInterface.sendToAllClients(decor.getUpdatePacket(axis, textLines));
+            InterfacePacket.sendToAllClients(decor.getUpdatePacket(axis, textLines));
         }
         return new Object[] {};
     }

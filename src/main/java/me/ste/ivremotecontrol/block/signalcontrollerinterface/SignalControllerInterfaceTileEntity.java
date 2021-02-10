@@ -7,10 +7,10 @@ import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.Connector;
 import li.cil.oc.api.network.Visibility;
 import li.cil.oc.api.prefab.TileEntityEnvironment;
-import mcinterface1122.BuilderTileEntity;
 import minecrafttransportsimulator.blocks.tileentities.components.ATileEntityBase;
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntitySignalController;
-import minecrafttransportsimulator.mcinterface.MasterLoader;
+import minecrafttransportsimulator.mcinterface.BuilderTileEntity;
+import minecrafttransportsimulator.packets.components.InterfacePacket;
 import minecrafttransportsimulator.packets.instances.PacketTileEntitySignalControllerChange;
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.tileentity.TileEntity;
@@ -87,7 +87,7 @@ public class SignalControllerInterfaceTileEntity extends TileEntityEnvironment i
             }
             if(modified) {
                 controller.updateState(TileEntitySignalController.OpState.GREEN_MAIN_RED_CROSS, true);
-                MasterLoader.networkInterface.sendToAllClients(new PacketTileEntitySignalControllerChange(controller));
+                InterfacePacket.sendToAllClients(new PacketTileEntitySignalControllerChange(controller));
             }
         }
         return new Object[] {};
@@ -109,7 +109,7 @@ public class SignalControllerInterfaceTileEntity extends TileEntityEnvironment i
             try {
                 controller.currentOpMode = TileEntitySignalController.OpMode.valueOf(args.checkString(0));
                 controller.updateState(TileEntitySignalController.OpState.GREEN_MAIN_RED_CROSS, true);
-                MasterLoader.networkInterface.sendToAllClients(new PacketTileEntitySignalControllerChange(controller));
+                InterfacePacket.sendToAllClients(new PacketTileEntitySignalControllerChange(controller));
             } catch(IllegalArgumentException ignored) {}
         }
         return new Object[] {};
@@ -130,7 +130,7 @@ public class SignalControllerInterfaceTileEntity extends TileEntityEnvironment i
         if(controller != null) {
             controller.greenMainTime = args.checkInteger(0);
             controller.updateState(TileEntitySignalController.OpState.GREEN_MAIN_RED_CROSS, true);
-            MasterLoader.networkInterface.sendToAllClients(new PacketTileEntitySignalControllerChange(controller));
+            InterfacePacket.sendToAllClients(new PacketTileEntitySignalControllerChange(controller));
         }
         return new Object[] {};
     }
@@ -150,7 +150,7 @@ public class SignalControllerInterfaceTileEntity extends TileEntityEnvironment i
         if(controller != null) {
             controller.greenCrossTime = args.checkInteger(0);
             controller.updateState(TileEntitySignalController.OpState.GREEN_MAIN_RED_CROSS, true);
-            MasterLoader.networkInterface.sendToAllClients(new PacketTileEntitySignalControllerChange(controller));
+            InterfacePacket.sendToAllClients(new PacketTileEntitySignalControllerChange(controller));
         }
         return new Object[] {};
     }
@@ -170,7 +170,7 @@ public class SignalControllerInterfaceTileEntity extends TileEntityEnvironment i
         if(controller != null) {
             controller.yellowMainTime = args.checkInteger(0);
             controller.updateState(TileEntitySignalController.OpState.GREEN_MAIN_RED_CROSS, true);
-            MasterLoader.networkInterface.sendToAllClients(new PacketTileEntitySignalControllerChange(controller));
+            InterfacePacket.sendToAllClients(new PacketTileEntitySignalControllerChange(controller));
         }
         return new Object[] {};
     }
@@ -190,7 +190,7 @@ public class SignalControllerInterfaceTileEntity extends TileEntityEnvironment i
         if(controller != null) {
             controller.yellowCrossTime = args.checkInteger(0);
             controller.updateState(TileEntitySignalController.OpState.GREEN_MAIN_RED_CROSS, true);
-            MasterLoader.networkInterface.sendToAllClients(new PacketTileEntitySignalControllerChange(controller));
+            InterfacePacket.sendToAllClients(new PacketTileEntitySignalControllerChange(controller));
         }
         return new Object[] {};
     }
@@ -210,7 +210,7 @@ public class SignalControllerInterfaceTileEntity extends TileEntityEnvironment i
         if(controller != null) {
             controller.allRedTime = args.checkInteger(0);
             controller.updateState(TileEntitySignalController.OpState.GREEN_MAIN_RED_CROSS, true);
-            MasterLoader.networkInterface.sendToAllClients(new PacketTileEntitySignalControllerChange(controller));
+            InterfacePacket.sendToAllClients(new PacketTileEntitySignalControllerChange(controller));
         }
         return new Object[] {};
     }
@@ -230,8 +230,8 @@ public class SignalControllerInterfaceTileEntity extends TileEntityEnvironment i
         if(controller != null) {
             Map<String, Object> state = new HashMap<>();
             state.put("name", controller.currentOpState.name());
-            state.put("mainSignal", controller.currentOpState.mainSignalState.name());
-            state.put("crossSignal", controller.currentOpState.crossSignalState.name());
+            state.put("mainSignal", controller.currentOpState.mainLight.name());
+            state.put("crossSignal", controller.currentOpState.crossLight.name());
             return new Object[] {state};
         }
         return new Object[] {};
