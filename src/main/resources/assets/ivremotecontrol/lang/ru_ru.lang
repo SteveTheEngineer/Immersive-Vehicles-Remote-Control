@@ -1,0 +1,17 @@
+﻿itemGroup.ivremotecontrol:tab=Immersive Vehicles Remote Control
+
+item.ivremotecontrol:vehicle_selector.name=Связыватель транспорта
+item.ivremotecontrol:vehicle_selector.tooltip.help0=Нажмите ПКМ на транспортном средстве, чтобы привязать его
+item.ivremotecontrol:vehicle_selector.tooltip.help1=Нажмите Shift+ПКМ в пустоту, чтобы отвязать
+item.ivremotecontrol:vehicle_selector.tooltip.entity=Выбранное транспортное средство: %s
+item.ivremotecontrol:vehicle_selector.tooltip.vehicle=Выбранное транспортное средство: %s
+
+chat.ivremotecontrol:vehicle_selector.selected=Транспортное средство было привязано
+chat.ivremotecontrol:vehicle_selector.select_failed=Вы должны быть владельцем транспортного средства, чтобы привязать его
+chat.ivremotecontrol:vehicle_selector.deselected=Транспортное средство было отвязано
+
+tile.ivremotecontrol:vehicle_remote_controller.name=Блок дистанционного управления транспортом
+tile.ivremotecontrol:fuel_pump_interface.name=Интерфейс топливной колонки
+tile.ivremotecontrol:fluid_loader_interface.name=Интерфейс загрузчика жидкости
+tile.ivremotecontrol:signal_controller_interface.name=Интерфейс контроллера светофоров
+tile.ivremotecontrol:decor_interface.name=Интерфейс декоративных блоков
