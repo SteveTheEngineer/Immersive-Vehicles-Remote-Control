@@ -4,8 +4,7 @@ import minecrafttransportsimulator.blocks.components.ABlockBase;
 import minecrafttransportsimulator.blocks.tileentities.components.ATileEntityPole_Component;
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityPole;
 import minecrafttransportsimulator.jsondefs.JSONText;
-import minecrafttransportsimulator.packets.instances.PacketTileEntityPoleChange;
-import minecrafttransportsimulator.rendering.components.ITextProvider;
+import minecrafttransportsimulator.packets.instances.PacketEntityTextChange;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +20,8 @@ public class TileEntityPoleWrapper implements Decor {
     @Override
     public List<String> getTextLines(ABlockBase.Axis axis) {
         ATileEntityPole_Component component = this.pole.components.get(axis);
-        if(component instanceof ITextProvider) {
-            return new ArrayList<>(((ITextProvider) component).getText().values());
+        if(component != null) {
+            return new ArrayList<>(component.text.values());
         } else {
             return null;
         }
@@ -31,24 +30,26 @@ public class TileEntityPoleWrapper implements Decor {
     @Override
     public void setTextLines(ABlockBase.Axis axis, List<String> lines) {
         ATileEntityPole_Component component = this.pole.components.get(axis);
-        if(component instanceof ITextProvider && component.definition.rendering != null && component.definition.rendering.textObjects != null) {
-            int i = 0;
-            for(JSONText text : component.definition.rendering.textObjects) {
-                ((ITextProvider) component).getText().put(text, lines.get(i++));
-            }
+        if(component != null) {
+            component.updateText(lines);
         }
     }
 
     @Override
-    public PacketTileEntityPoleChange getUpdatePacket(ABlockBase.Axis axis, List<String> lines) {
-        return new PacketTileEntityPoleChange(this.pole, axis, null, lines, false);
+    public PacketEntityTextChange getUpdatePacket(ABlockBase.Axis axis, List<String> lines) {
+        ATileEntityPole_Component component = this.pole.components.get(axis);
+        if(component != null) {
+            return new PacketEntityTextChange(component, lines);
+        } else {
+            return null;
+        }
     }
 
     @Override
     public List<JSONText> getDefinitionTextObjects(ABlockBase.Axis axis) {
         ATileEntityPole_Component component = this.pole.components.get(axis);
         if(component != null) {
-            return component.definition.general.textObjects;
+            return component.definition.rendering.textObjects;
         } else {
             return null;
         }

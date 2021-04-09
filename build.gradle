@@ -17,30 +17,33 @@ buildscript {
 apply plugin: "net.minecraftforge.gradle.forge"
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
-immersiveVehiclesVersion = 3180272 // The version of Immersive Vehicles used, file id on curseforge
-version = "1.8"
+immersiveVehiclesVersion = 3261647 // The version of Immersive Vehicles used, the file id on CurseForge
+version = "1.9"
 group = "me.ste.ivremotecontrol" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "ivremotecontrol"
 
-sourceCompatibility = targetCompatibility = "1.8" // Need this here so eclipse task generates correctly.
-compileJava {
-    sourceCompatibility = targetCompatibility = "1.8"
-}
+Path libsDirectory = projectDir.toPath().resolve("libs")
+URL downloadUrl = new URL(String.join("\n", new URL("https://addons-ecs.forgesvc.net/api/v2/addon/286703/file/${immersiveVehiclesVersion}/download-url").openConnection().getInputStream().readLines()))
+String immersiveVehiclesFilename = Paths.get(downloadUrl.getPath()).getFileName().toString()
+Path immersiveVehiclesFile = libsDirectory.resolve(immersiveVehiclesFilename)
 
 // Make sure the libs directory exists
-Path libsDirectory = Paths.get("libs");
 if(!Files.isDirectory(libsDirectory)) {
     Files.createDirectory(libsDirectory);
 }
 
 // Download immersive vehicles if it either does not exist or the version doesn't match the required version
-URL downloadUrl = new URL(String.join("\n", new URL("https://addons-ecs.forgesvc.net/api/v2/addon/286703/file/${immersiveVehiclesVersion}/download-url").openConnection().getInputStream().readLines()));
-String immersiveVehiclesFilename = Paths.get(downloadUrl.getPath()).getFileName().toString();
-Path immersiveVehiclesFile = libsDirectory.resolve(immersiveVehiclesFilename);
 if(!Files.isRegularFile(immersiveVehiclesFile)) {
     println("Downloading ${immersiveVehiclesFilename}...");
     new FileOutputStream(immersiveVehiclesFile.toString()).getChannel().transferFrom(Channels.newChannel(downloadUrl.openStream()), 0L, Long.MAX_VALUE);
     println("Download finished");
+}
+
+
+
+sourceCompatibility = targetCompatibility = "1.8" // Need this here so eclipse task generates correctly.
+compileJava {
+    sourceCompatibility = targetCompatibility = "1.8"
 }
 
 minecraft {

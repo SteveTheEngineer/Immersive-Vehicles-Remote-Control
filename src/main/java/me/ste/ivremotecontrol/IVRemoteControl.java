@@ -4,7 +4,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 
-@Mod(modid = "ivremotecontrol", name = "IV Remote Control", version = "1.8", acceptedMinecraftVersions = "1.12.2", dependencies = "required-after:mts@19.14.0;required-after:opencomputers@[1.7.5.192,);")
+@Mod(modid = "ivremotecontrol", name = "IV Remote Control", version = "1.9", acceptedMinecraftVersions = "1.12.2", dependencies = "required-after:mts@19.15.7;required-after:opencomputers@[1.7.5.192,);")
 public class IVRemoteControl {
     public static final short MIN_FLAPS_ANGLE = 0;
     public static final short AILERON_TRIM_STEP = 1;

@@ -11,9 +11,9 @@ import me.ste.ivremotecontrol.block.signalcontrollerinterface.SignalControllerIn
 import me.ste.ivremotecontrol.block.vehicleremotecontroller.VehicleRemoteControllerBlock;
 import me.ste.ivremotecontrol.block.vehicleremotecontroller.VehicleRemoteControllerTileEntity;
 import me.ste.ivremotecontrol.item.VehicleSelectorItem;
+import minecrafttransportsimulator.entities.components.AEntityA_Base;
+import minecrafttransportsimulator.entities.instances.EntityVehicleF_Physics;
 import minecrafttransportsimulator.mcinterface.BuilderEntity;
-import minecrafttransportsimulator.vehicles.main.AEntityBase;
-import minecrafttransportsimulator.vehicles.main.EntityVehicleF_Physics;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
@@ -88,7 +88,7 @@ public class EventListener {
             try {
                 Field entity = BuilderEntity.class.getDeclaredField("entity");
                 entity.setAccessible(true);
-                AEntityBase entityVehicle = (AEntityBase) entity.get(event.getTarget());
+                AEntityA_Base entityVehicle = (AEntityA_Base) entity.get(event.getTarget());
                 if (entityVehicle instanceof EntityVehicleF_Physics) {
                     EntityVehicleF_Physics vehicle = (EntityVehicleF_Physics) entityVehicle;
 

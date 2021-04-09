@@ -3,7 +3,7 @@
         "modid": "ivremotecontrol",
         "name": "Immersive Vehicles Remote Control",
         "description": "Introduces a way to control Immersive Vehicles vehicles remotely through OpenComputers",
-        "version": "1.8",
+        "version": "1.9",
         "mcversion": "1.12.2",
         "authorList": [
             "SteveTheEngineer"

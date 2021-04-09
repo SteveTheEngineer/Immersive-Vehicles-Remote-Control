@@ -3,9 +3,8 @@ package me.ste.ivremotecontrol.block.decorinterface.decor;
 import minecrafttransportsimulator.blocks.components.ABlockBase;
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityDecor;
 import minecrafttransportsimulator.jsondefs.JSONText;
-import minecrafttransportsimulator.packets.instances.PacketTileEntityDecorTextChange;
+import minecrafttransportsimulator.packets.instances.PacketEntityTextChange;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,7 +18,7 @@ public class TileEntityDecorWrapper implements Decor {
 
     @Override
     public List<String> getTextLines(ABlockBase.Axis axis) {
-        return new LinkedList<>(this.decor.getText().values());
+        return new LinkedList<>(this.decor.text.values());
     }
 
     @Override
@@ -33,13 +32,13 @@ public class TileEntityDecorWrapper implements Decor {
     }
 
     @Override
-    public PacketTileEntityDecorTextChange getUpdatePacket(ABlockBase.Axis axis, List<String> lines) {
-        return new PacketTileEntityDecorTextChange(this.decor, lines);
+    public PacketEntityTextChange getUpdatePacket(ABlockBase.Axis axis, List<String> lines) {
+        return new PacketEntityTextChange(this.decor, lines);
     }
 
     @Override
     public List<JSONText> getDefinitionTextObjects(ABlockBase.Axis axis) {
-        return this.decor.definition.general.textObjects;
+        return this.decor.definition.rendering.textObjects;
     }
 
     @Override

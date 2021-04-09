@@ -10,9 +10,11 @@ import li.cil.oc.api.prefab.TileEntityEnvironment;
 import minecrafttransportsimulator.baseclasses.FluidTank;
 import minecrafttransportsimulator.blocks.tileentities.components.ATileEntityBase;
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityFluidLoader;
+import minecrafttransportsimulator.entities.instances.EntityVehicleF_Physics;
+import minecrafttransportsimulator.mcinterface.BuilderEntity;
 import minecrafttransportsimulator.mcinterface.BuilderTileEntity;
-import minecrafttransportsimulator.vehicles.main.EntityVehicleF_Physics;
 import net.minecraft.block.BlockDirectional;
+import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
@@ -107,8 +109,13 @@ public class FluidLoaderInterfaceTileEntity extends TileEntityEnvironment implem
     public Object[] getConnectedVehicle(Context ctx, Arguments args) {
         TileEntityFluidLoader loader = this.getLoader();
         if(loader != null && loader.connectedPart != null) {
-            EntityVehicleF_Physics vehicle = loader.connectedPart.vehicle;
-            return new Object[] {vehicle.wrapper.entity.getUniqueID().toString(), vehicle.uniqueUUID};
+            EntityVehicleF_Physics vehicle = loader.connectedPart.linkedVehicle;
+            for (Entity entity : loader.world.world.loadedEntityList) {
+                if (entity instanceof BuilderEntity && ((BuilderEntity) entity).entity.uniqueUUID.equals(vehicle.uniqueUUID)) {
+                    return new Object[] {entity.getUniqueID().toString(), vehicle.uniqueUUID};
+                }
+            }
+            return new Object[] {vehicle.uniqueUUID};
         }
         return new Object[] {};
     }

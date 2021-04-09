@@ -13,8 +13,8 @@ public class ModGuiHandler implements IGuiHandler {
     public static final int VEHICLE_REMOTE_CONTROLLER = 0;
 
     @Override
-    public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-        switch(ID) {
+    public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
+        switch(id) {
             case ModGuiHandler.VEHICLE_REMOTE_CONTROLLER:
                 return new VehicleRemoteControllerContainer(player.inventory, (VehicleRemoteControllerTileEntity) world.getTileEntity(new BlockPos(x, y, z)));
             default:
@@ -23,10 +23,10 @@ public class ModGuiHandler implements IGuiHandler {
     }
 
     @Override
-    public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-        switch(ID) {
+    public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
+        switch(id) {
             case ModGuiHandler.VEHICLE_REMOTE_CONTROLLER:
-                return new VehicleRemoteControllerGUI((Container) this.getServerGuiElement(ID, player, world, x, y, z), player.inventory);
+                return new VehicleRemoteControllerGUI((Container) this.getServerGuiElement(id, player, world, x, y, z), player.inventory);
             default:
                 return null;
         }

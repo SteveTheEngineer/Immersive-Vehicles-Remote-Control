@@ -12,14 +12,16 @@ import minecrafttransportsimulator.blocks.tileentities.components.ATileEntityBas
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityFuelPump;
 import minecrafttransportsimulator.mcinterface.BuilderEntity;
 import minecrafttransportsimulator.mcinterface.BuilderTileEntity;
+import minecrafttransportsimulator.mcinterface.WrapperEntity;
 import minecrafttransportsimulator.packets.components.InterfacePacket;
 import minecrafttransportsimulator.packets.instances.PacketTileEntityFuelPumpConnection;
 import minecrafttransportsimulator.systems.ConfigSystem;
-import minecrafttransportsimulator.vehicles.main.AEntityBase;
-import minecrafttransportsimulator.vehicles.main.EntityVehicleF_Physics;
-import minecrafttransportsimulator.vehicles.parts.APart;
-import minecrafttransportsimulator.vehicles.parts.PartEngine;
+import minecrafttransportsimulator.entities.components.AEntityA_Base;
+import minecrafttransportsimulator.entities.instances.EntityVehicleF_Physics;
+import minecrafttransportsimulator.entities.instances.APart;
+import minecrafttransportsimulator.entities.instances.PartEngine;
 import net.minecraft.block.BlockDirectional;
+import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
@@ -93,7 +95,12 @@ public class FuelPumpInterfaceTileEntity extends TileEntityEnvironment implement
         if(pump != null) {
             EntityVehicleF_Physics vehicle = pump.connectedVehicle;
             if(vehicle != null) {
-                return new Object[] {vehicle.wrapper.entity.getUniqueID().toString(), vehicle.uniqueUUID};
+                for (Entity entity : pump.connectedVehicle.world.world.loadedEntityList) {
+                    if (entity instanceof BuilderEntity && ((BuilderEntity) entity).entity.uniqueUUID.equals(vehicle.uniqueUUID)) {
+                        return new Object[] {entity.getUniqueID().toString(), vehicle.uniqueUUID};
+                    }
+                }
+                return new Object[] {vehicle.uniqueUUID};
             }
         }
         return new Object[] {};
@@ -105,18 +112,23 @@ public class FuelPumpInterfaceTileEntity extends TileEntityEnvironment implement
         if(pump != null) {
             EntityVehicleF_Physics vehicle = null;
             double distance = 16D;
-            for(AEntityBase entity : AEntityBase.createdServerEntities){
+            for(AEntityA_Base entity : AEntityA_Base.getEntities(pump.world)){
                 if(!(entity instanceof EntityVehicleF_Physics)) {
                     continue;
                 }
-                double vehicleDistance = entity.position.distanceTo(pump.position);
+                double vehicleDistance = ((EntityVehicleF_Physics) entity).position.distanceTo(pump.position);
                 if(vehicleDistance < distance) {
                     distance = vehicleDistance;
                     vehicle = (EntityVehicleF_Physics) entity;
                 }
             }
             if(vehicle != null) {
-                return new Object[] {vehicle.wrapper.entity.getUniqueID(), vehicle.uniqueUUID};
+                for (Entity entity : pump.connectedVehicle.world.world.loadedEntityList) {
+                    if (entity instanceof BuilderEntity && ((BuilderEntity) entity).entity.uniqueUUID.equals(vehicle.uniqueUUID)) {
+                        return new Object[] {entity.getUniqueID().toString(), vehicle.uniqueUUID};
+                    }
+                }
+                return new Object[] {vehicle.uniqueUUID};
             }
         }
         return new Object[] {};
@@ -129,11 +141,11 @@ public class FuelPumpInterfaceTileEntity extends TileEntityEnvironment implement
             if(pump.connectedVehicle == null) {
                 EntityVehicleF_Physics vehicle = null;
                 double distance = 16D;
-                for(AEntityBase entity : AEntityBase.createdServerEntities){
+                for(AEntityA_Base entity : AEntityA_Base.getEntities(pump.world)){
                     if(!(entity instanceof EntityVehicleF_Physics)) {
                         continue;
                     }
-                    double vehicleDistance = entity.position.distanceTo(pump.position);
+                    double vehicleDistance = ((EntityVehicleF_Physics) entity).position.distanceTo(pump.position);
                     if(vehicleDistance < distance){
                         distance = vehicleDistance;
                         vehicle = (EntityVehicleF_Physics) entity;

@@ -73,6 +73,15 @@ public class DecorInterfaceTileEntity extends TileEntityEnvironment implements I
         return new Object[] {this.getDecor() != null};
     }
 
+    @Callback(direct = true, doc = "function(): boolean -- check whether the decor is a pole")
+    public Object[] isPole(Context ctx, Arguments args) {
+        Decor decor = this.getDecor();
+        if (decor != null) {
+            return new Object[] {decor.isPole()};
+        }
+        return new Object[] {};
+    }
+
     @Callback(direct = true, doc = "function(axis:string): table -- get the decor's text lines. The axis can be either NONE, UP, DOWN, NORTH, SOUTH, EAST or WEST")
     public Object[] getText(Context ctx, Arguments args) {
         Decor decor = this.getDecor();

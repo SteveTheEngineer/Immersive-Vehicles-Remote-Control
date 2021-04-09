@@ -12,18 +12,19 @@ import me.ste.ivremotecontrol.Configuration;
 import me.ste.ivremotecontrol.IVRemoteControl;
 import minecrafttransportsimulator.baseclasses.BeaconManager;
 import minecrafttransportsimulator.baseclasses.FluidTank;
+import minecrafttransportsimulator.entities.components.AEntityB_Existing;
+import minecrafttransportsimulator.jsondefs.JSONDoor;
 import minecrafttransportsimulator.jsondefs.JSONText;
-import minecrafttransportsimulator.jsondefs.JSONVehicle;
 import minecrafttransportsimulator.mcinterface.BuilderEntity;
 import minecrafttransportsimulator.mcinterface.WrapperEntity;
 import minecrafttransportsimulator.packets.components.InterfacePacket;
 import minecrafttransportsimulator.packets.instances.*;
 import minecrafttransportsimulator.rendering.components.LightType;
-import minecrafttransportsimulator.vehicles.main.AEntityBase;
-import minecrafttransportsimulator.vehicles.main.EntityVehicleF_Physics;
-import minecrafttransportsimulator.vehicles.parts.APart;
-import minecrafttransportsimulator.vehicles.parts.PartEngine;
-import minecrafttransportsimulator.vehicles.parts.PartGroundDevice;
+import minecrafttransportsimulator.entities.components.AEntityA_Base;
+import minecrafttransportsimulator.entities.instances.EntityVehicleF_Physics;
+import minecrafttransportsimulator.entities.instances.APart;
+import minecrafttransportsimulator.entities.instances.PartEngine;
+import minecrafttransportsimulator.entities.instances.PartGroundDevice;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -104,15 +105,9 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         } else if(Configuration.VEHICLE_LOOKUP_TARGET == Configuration.VehicleLookupTarget.VEHICLE) {
             for(Entity entity : this.getWorld().loadedEntityList) {
                 if(entity instanceof BuilderEntity) {
-                    try {
-                        Field entityField = BuilderEntity.class.getDeclaredField("entity");
-                        entityField.setAccessible(true);
-                        EntityVehicleF_Physics vehicle = (EntityVehicleF_Physics) entityField.get(entity);
-                        if(vehicle.uniqueUUID.equals(compound.getString("VehicleUUID"))) {
-                            return vehicle;
-                        }
-                    } catch (NoSuchFieldException | IllegalAccessException e) {
-                        e.printStackTrace();
+                    AEntityB_Existing wrapper = ((BuilderEntity) entity).entity;
+                    if (wrapper instanceof EntityVehicleF_Physics && wrapper.uniqueUUID.equals(compound.getString("VehicleUUID"))) {
+                        return (EntityVehicleF_Physics) wrapper;
                     }
                 }
             }
@@ -220,7 +215,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
                 properties.put("propellerGearboxRatio", part.propellerGearboxRatio);
                 properties.put("reverseGears", part.reverseGears);
                 properties.put("rpm", part.rpm);
-                properties.put("position", new Object[] {part.worldPos.x, part.worldPos.y, part.worldPos.z});
+                properties.put("position", new Object[] {part.position.x, part.position.y, part.position.z});
 
                 Map<String, Object> state = new HashMap<>();
 
@@ -252,7 +247,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
                 properties.put("angularPosition", wheel.angularPosition);
                 properties.put("angularVelocity", wheel.angularVelocity);
                 properties.put("skipAngularCalcs", wheel.skipAngularCalcs);
-                properties.put("position", new Object[] {wheel.worldPos.x, wheel.worldPos.y, wheel.worldPos.z});
+                properties.put("position", new Object[] {wheel.position.x, wheel.position.y, wheel.position.z});
 
                 wheels.add(properties);
             }
@@ -342,10 +337,10 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
             if(engine != null) {
                 boolean status = args.checkBoolean(1);
                 engine.setMagnetoStatus(status);
-                InterfacePacket.sendToAllClients(new PacketVehiclePartEngine(engine, status ? PacketVehiclePartEngine.Signal.MAGNETO_ON : PacketVehiclePartEngine.Signal.MAGNETO_OFF));
+                InterfacePacket.sendToAllClients(new PacketPartEngine(engine, status ? PacketPartEngine.Signal.MAGNETO_ON : PacketPartEngine.Signal.MAGNETO_OFF));
                 if(engine.state.magnetoOn && engine.state.esOn) {
                     engine.setElectricStarterStatus(false);
-                    InterfacePacket.sendToAllClients(new PacketVehiclePartEngine(engine, PacketVehiclePartEngine.Signal.ES_OFF));
+                    InterfacePacket.sendToAllClients(new PacketPartEngine(engine, PacketPartEngine.Signal.ES_OFF));
                 }
             }
         }
@@ -361,7 +356,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
                 if(engine.state.magnetoOn) {
                     boolean status = args.checkBoolean(1);
                     engine.setElectricStarterStatus(status);
-                    InterfacePacket.sendToAllClients(new PacketVehiclePartEngine(engine, status ? PacketVehiclePartEngine.Signal.ES_ON : PacketVehiclePartEngine.Signal.ES_OFF));
+                    InterfacePacket.sendToAllClients(new PacketPartEngine(engine, status ? PacketPartEngine.Signal.ES_ON : PacketPartEngine.Signal.ES_OFF));
                 }
             }
         }
@@ -408,10 +403,10 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
                 LightType type = LightType.valueOf(name.toUpperCase());
                 if (!vehicle.variablesOn.contains(type.lowercaseName) && state) {
                     vehicle.variablesOn.add(type.lowercaseName);
-                    InterfacePacket.sendToAllClients(new PacketVehicleVariableToggle(vehicle, type.lowercaseName));
+                    InterfacePacket.sendToAllClients(new PacketEntityVariableToggle(vehicle, type.lowercaseName));
                 } else if (vehicle.variablesOn.contains(type.lowercaseName) && !state) {
                     vehicle.variablesOn.remove(type.lowercaseName);
-                    InterfacePacket.sendToAllClients(new PacketVehicleVariableToggle(vehicle, type.lowercaseName));
+                    InterfacePacket.sendToAllClients(new PacketEntityVariableToggle(vehicle, type.lowercaseName));
                 }
             } catch(IllegalArgumentException ignored) {}
         }
@@ -451,14 +446,14 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
             String name = args.checkString(0);
             boolean open = args.checkBoolean(1);
             if(vehicle.definition.doors != null) {
-                for(JSONVehicle.VehicleDoor door : vehicle.definition.doors) {
+                for(JSONDoor door : vehicle.definition.doors) {
                     if(door.name.equals(name)) {
                         if (!vehicle.variablesOn.contains(name) && open) {
                             vehicle.variablesOn.add(name);
-                            InterfacePacket.sendToAllClients(new PacketVehicleVariableToggle(vehicle, name));
+                            InterfacePacket.sendToAllClients(new PacketEntityVariableToggle(vehicle, name));
                         } else if (vehicle.variablesOn.contains(name) && !open) {
                             vehicle.variablesOn.remove(name);
-                            InterfacePacket.sendToAllClients(new PacketVehicleVariableToggle(vehicle, name));
+                            InterfacePacket.sendToAllClients(new PacketEntityVariableToggle(vehicle, name));
                         }
                         break;
                     }
@@ -473,7 +468,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
             try {
-                for(JSONVehicle.VehicleDoor door : vehicle.definition.doors) {
+                for(JSONDoor door : vehicle.definition.doors) {
                     if (door.name.equals(args.checkString(0))) {
                         return new Object[] {vehicle.variablesOn.contains(door.name)};
                     }
@@ -488,7 +483,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
             Set<String> doorsOpen = new HashSet<>();
-            for(JSONVehicle.VehicleDoor door : vehicle.definition.doors) {
+            for(JSONDoor door : vehicle.definition.doors) {
                 if(vehicle.variablesOn.contains(door.name)) {
                     doorsOpen.add(door.name);
                 }
@@ -503,7 +498,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
             Set<String> doors = new HashSet<>();
-            for(JSONVehicle.VehicleDoor door : vehicle.definition.doors) {
+            for(JSONDoor door : vehicle.definition.doors) {
                 doors.add(door.name);
             }
             return new Object[] {doors.toArray(new String[0])};
@@ -548,25 +543,6 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         EntityVehicleF_Physics vehicle = this.getVehicle();
         if(vehicle != null) {
             return new Object[] {vehicle.hornOn};
-        }
-        return new Object[] {};
-    }
-
-    @Callback(doc = "function(siren:boolean) -- set the vehicle siren state")
-    public Object[] setSiren(Context ctx, Arguments args) {
-        EntityVehicleF_Physics vehicle = this.getVehicle();
-        if(vehicle != null) {
-            vehicle.sirenOn = args.checkBoolean(0);
-            InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.SIREN, vehicle.sirenOn));
-        }
-        return new Object[] {};
-    }
-
-    @Callback(direct = true, doc = "function(): boolean -- get the vehicle siren state")
-    public Object[] getSiren(Context ctx, Arguments args) {
-        EntityVehicleF_Physics vehicle = this.getVehicle();
-        if(vehicle != null) {
-            return new Object[] {vehicle.sirenOn};
         }
         return new Object[] {};
     }
@@ -823,10 +799,10 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
                     if(variable.equals(name)) {
                         if (!vehicle.variablesOn.contains(name) && state) {
                             vehicle.variablesOn.add(name);
-                            InterfacePacket.sendToAllClients(new PacketVehicleVariableToggle(vehicle, name));
+                            InterfacePacket.sendToAllClients(new PacketEntityVariableToggle(vehicle, name));
                         } else if (vehicle.variablesOn.contains(name) && !state) {
                             vehicle.variablesOn.remove(name);
-                            InterfacePacket.sendToAllClients(new PacketVehicleVariableToggle(vehicle, name));
+                            InterfacePacket.sendToAllClients(new PacketEntityVariableToggle(vehicle, name));
                         }
                         break;
                     }
@@ -875,13 +851,13 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
         if(vehicle != null) {
             Set<String> errors = new HashSet<>();
             if(vehicle.towedVehicle == null) {
-                for(AEntityBase entity : AEntityBase.createdServerEntities) {
+                for(AEntityA_Base entity : AEntityA_Base.getEntities(vehicle.world)) {
                     if(entity instanceof EntityVehicleF_Physics && !entity.equals(vehicle)) {
                         EntityVehicleF_Physics.TrailerConnectionResult result = vehicle.tryToConnect((EntityVehicleF_Physics) entity);
                         if(result == EntityVehicleF_Physics.TrailerConnectionResult.TRAILER_CONNECTED) {
                             return new Object[] {true, vehicle.towedVehicle.uniqueUUID};
                         } else {
-                            errors.add(StringUtils.capitalize(result.name().replace('_', ' ').toLowerCase()));
+                            errors.add(result.name());
                         }
                     }
                 }
@@ -954,7 +930,7 @@ public class VehicleRemoteControllerTileEntity extends TileEntityEnvironment imp
                 }
             }
 
-            InterfacePacket.sendToAllClients(new PacketVehicleTextChange(vehicle, textLines));
+            InterfacePacket.sendToAllClients(new PacketEntityTextChange(vehicle, textLines));
         }
         return new Object[] {};
     }
