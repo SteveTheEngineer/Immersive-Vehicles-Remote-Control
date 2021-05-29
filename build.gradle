@@ -12,13 +12,15 @@ buildscript {
     }
     dependencies {
         classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.40"
     }
 }
 apply plugin: "net.minecraftforge.gradle.forge"
+apply plugin: "kotlin"
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 immersiveVehiclesVersion = 3261647 // The version of Immersive Vehicles used, the file id on CurseForge
-version = "1.9"
+version = "2.0"
 group = "me.ste.ivremotecontrol" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "ivremotecontrol"
 
@@ -60,9 +62,12 @@ minecraft {
 }
 
 repositories {
+    jcenter()
     maven {
-        name = "oc"
-        url = "http://maven.cil.li/"
+        url = "https://squiddev.cc/maven/"
+    }
+    maven {
+        url = "http://maven.shadowfacts.net/"
     }
 }
 
@@ -71,7 +76,7 @@ dependencies {
     // or you may define them like so..
     //compile "some.group:artifact:version:classifier"
     //compile "some.group:artifact:version"
-      
+
     // real examples
     //compile "com.mod-buildcraft:buildcraft:6.0.8:dev"  // adds buildcraft to the dev env
     //compile "com.googlecode.efficient-java-matrix-library:ejml:0.24" // adds ejml to the dev env
@@ -88,8 +93,10 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
-    compile "li.cil.oc:OpenComputers:MC1.12.2-1.7.5.213:api"
     compile files(immersiveVehiclesFile.toString()) // Add immersive vehicles as a dependency
+    compile "org.squiddev:cc-tweaked-1.12.2:1.89.2"
+    compile "net.shadowfacts:Forgelin:1.8.4"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:1.3.40"
 }
 
 processResources {

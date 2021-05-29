@@ -1,0 +1,23 @@
+The Fuel Pump Interface is a peripheral device available for CraftOS. Type "help peripheral" to learn about using the Peripheral API to connect with peripherals. When a Fuel Pump Interface is connected, peripheral.getType() will return "fuelpump".
+
+Methods exposed by the Fuel Pump Interface:
+isAvailable(): boolean
+- Check whether a fuel pump is connected to the interface
+
+getFuel(): string, integer, integer
+- Get the fluid name, fluid level and the max fluid level of the fuel in the pump
+
+isFueling(): boolean
+- Check whether the fuel pump is fueling a vehicle
+
+getVehicle(): string, string
+- Get the entity UUID and vehicle UUID of the vehicle being fueled, or nothing if no vehicle is being fueled
+
+getNearestVehicle(): string, string
+- Get the entity UUID and vehicle UUID of the vehicle closest to the fuel pump, or nothing if no vehicle is near. This is the vehicle that will get fueled once you call the start method
+
+start(): boolean, string
+- Start fueling the nearest vehicle. Returns true if successful, or false and the error message otherwise
+
+stop()
+- Stop fueling the current vehicle

@@ -1,0 +1,202 @@
+The Vehicle Remote Interface is a peripheral device available for CraftOS. Type "help peripheral" to learn about using the Peripheral API to connect with peripherals. When a Vehicle Remote Interface is connected, peripheral.getType() will return "vehicle".
+All methods here involving time are using the units of seconds.
+All methods here involving angles are using the units of degrees.
+The bounds for the flap angle, angles and their trims can be found by calling "getConstants()".
+The maximum value for angle cooldowns is 6.35 seconds.
+Cooldown of an angle is the time that has to pass until the angle is reset to 0.
+
+Methods exposed by the Vehicle Remote Interface:
+isAvailable(): boolean
+- Check whether a vehicle is connected to the interface
+
+getLocation(): decimal, decimal, decimal, integer
+- Get the X, Y and Z coordinates, as well as the ID of the dimension the vehicle's in
+
+getVelocity(): decimal, decimal, decimal, decimal
+- Get the X, Y, Z motion and the vehicle's velocity
+
+getRotation(): decimal, decimal, decimal
+- Get the X (pitch), Y (yaw) and Z (roll) angles
+
+getUniqueIds(): string, string
+- Get the entity UUID and the vehicle UUID
+
+getFuel(): string, integer, integer
+- Get the name of fluid in the fluid tank, fluid level and max fluid level
+
+isBeingFueled(): boolean
+- Check whether the vehicle is being fueled
+
+getDefinition(): table
+- Get the JSON definition
+
+getOwner(): string
+- Get the UUID of the owner
+
+getMass(): integer
+- Get the mass in the units of kilograms
+
+getElectricPower(): decimal
+- Get the electric power of the battery
+
+getEngines(): table{engineId: integer = details: table}
+- Get the details of all engines
+
+getWheels(): table{table...}
+- Get the details of all wheels
+
+getPassengers(): table{table{["uuid"]: string, ["name"]: string, ["controller"]: boolean}...}
+- Get the passengers
+
+isLocked(): boolean
+- Check whether the vehicle is locked
+
+setLocked(value: boolean)
+- Set the locked status of the vehicle
+
+getThrottle(): decimal
+- Get the throttle, range 0 to 1
+
+setThrottle(value: decimal)
+- Set the throttle, range 0 to 1
+
+getBrakeLevel(): decimal
+- Get the brake level, range 0 to 1
+
+setBrakeLevel(value: decimal)
+- Set the brake level, range 0 to 1
+
+isParkingBrakeActive(): boolean
+- Check whether the parking brake is active on the vehicle
+
+setParkingBrakeActive(value: boolean)
+- Set the state of the parking brake
+
+setMagnetoActive(engineId: integer, value: boolean)
+- Set the magneto state on the specified engine
+
+setStarterActive(engineId: integer, value: boolean)
+- Set the electric starter state on the specified engine
+
+shiftUp()
+- Shift the gears up
+
+shiftDown()
+- Shift the gears down
+
+getLights(): table{light: string = value: boolean}
+- Get the states of all lights
+
+setLightActive(light: string, value: boolean)
+- Set the state of a light
+
+getDoors(): table{doorId: string = value: boolean}
+- Get the states of all doors
+
+setDoorOpen(doorId: string, value: boolean)
+- Set the state of a door
+
+getCruiseState(): boolean, decimal
+- Get the state of cruise control and it's target speed
+
+setCruiseActive(): boolean
+- Set the state of cruise control. When activated, the cruise control speed will be set to the current velocity
+
+isHornActive(): boolean
+- Check whether the horn is active
+
+setHornActive(value: boolean)
+- Set the state of the horn
+
+isThrustReversed(): boolean
+- Check whether reverse thrust is enabled
+
+setThrustReversed(value: boolean)
+- Set the state of the reverse thrust on the vehicle
+
+isAutopilotActive(): boolean
+- Check whether autopilot is active
+
+setAutopilotActive(value: boolean)
+- Set the state of autopilot
+
+getFlapAngle(): integer, decimal
+- Get the target and the current angle of the flaps
+
+setFlapAngle(value: integer)
+- Set the target angle of the flaps
+
+getAileronTrim(): integer
+- Get the aileron trim
+
+setAileronTrim(value: integer)
+- Set the aileron trim
+
+getAileronAngle(): decimal, decimal
+- Get the actual aileron angle and the left cooldown
+
+setAileronAngle(value: decimal, cooldown: decimal)
+- Set the aileron angle
+
+getElevatorTrim(): integer
+- Get the elevator trim
+
+setElevatorTrim(value: integer)
+- Set the elevator trim
+
+getElevatorAngle(): decimal, decimal
+- Get the actual elevator angle and the left cooldown
+
+setElevatorAngle(value: decimal, cooldown: decimal)
+- Set the elevator angle
+
+getRudderTrim(): integer
+- Get the rudder trim
+
+setRudderTrim(value: integer)
+- Set the rudder trim
+
+getRudderAngle(): decimal, decimal
+- Get the actual rudder angle and the left cooldown
+
+setRudderAngle(value: decimal, cooldown: decimal)
+- Set the rudder angle
+
+getLandingGearState(): boolean, integer
+- Get whether the landing gear is deployed and it's movement time
+
+setLandingGearDeployed(value: boolean)
+- Set the state of the landing gear
+
+getCustomVariables(): table{variableName: string = value: boolean}
+- Get the states of the custom variables
+
+setCustomVariableActive(variableName: string, value: boolean)
+- Set the state of a custom variable
+
+getTrailer(): string, string
+- Get the entity UUID and the vehicle UUID of the trailer, or nothing if there's no trailer attached
+
+attachTrailer(): boolean, {string...}?
+- Attempt to attach a trailer. Returns true if a trailer was attached, or false and an array of possible issues otherwise
+
+detachTrailer()
+- Detach the trailer
+
+getTextEntries(): table{textEntryName: string = value: string}
+- Get the text entries
+
+setTextEntry(textEntryName: string, value: string)
+- Set the value of a text entry
+
+getSelectedBeacon(): string
+- Get the name of the selected beacon
+
+setSelectedBeacon(value: string)
+- Set the selected beacon by it's name
+
+getGuns(): table{key: number = details: table}
+- Get the details of all guns
+
+getConstants(): table{constantName: string = value: integer}
+- Get the values of Immersive Vehicles constants

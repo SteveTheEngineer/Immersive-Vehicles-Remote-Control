@@ -2,19 +2,21 @@
     {
         "modid": "ivremotecontrol",
         "name": "Immersive Vehicles Remote Control",
-        "description": "Introduces a way to control Immersive Vehicles vehicles remotely through OpenComputers",
-        "version": "1.9",
+        "description": "This mod lets you control MTS's vehicles and interact with it's blocks using ComputerCraft",
+        "version": "2.0",
         "mcversion": "1.12.2",
         "authorList": [
             "SteveTheEngineer"
         ],
         "requiredMods": [
-            "opencomputers",
-            "mts"
+            "computercraft",
+            "mts",
+            "forgelin"
         ],
         "dependencies": [
-            "opencomputers",
-            "mts"
+            "computercraft",
+            "mts",
+            "forgelin"
         ]
     }
 ]

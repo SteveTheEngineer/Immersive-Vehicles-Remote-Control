@@ -1,0 +1,61 @@
+The Signal Controller Interface is a peripheral device available for CraftOS. Type "help peripheral" to learn about using the Peripheral API to connect with peripherals. When a Signal Controller Interface is connected, peripheral.getType() will return "signalcontroller".
+The "opmode" type is either "timed_cycle", "vehicle_trigger", "redstone_trigger" or "remote_control".
+The "opstate" type is either "green_main_red_cross", "yellow_main_red_cross", "red_main_red_cross", "red_main_green_cross", "red_main_yellow_cross" or "red_main2_red_cross2".
+The "lighttype" type is either "golight", "cautionlight" or "stoplight".
+The "axis" type is either "x" or "z".
+All methods here involving time are using the units of seconds.
+
+Methods exposed by the Signal Controller Interface:
+isAvailable(): boolean
+- Check whether a signal controller is connected to the interface
+
+getAxis(): axis
+- Get the controller's primary axis
+
+setAxis(value: axis)
+- Set the controller's primary axis
+
+getMode(): opmode
+- Get the controller's operation mode
+
+setMode(value: opmode)
+- Set the controller's operation mode
+
+getGreenMainTime(): integer
+- Get the time the main signal is green
+
+setGreenMainTime(value: integer)
+- Set the time the main signal is green
+
+getGreenCrossTime(): integer
+- Get the time the cross signal is green
+
+setGreenCrossTime(value: integer)
+- Set the time the cross signal is green
+
+getYellowMainTime(): integer
+- Get the time the main signal is yellow
+
+setYellowMainTime(value: integer)
+- Set the time the main signal is yellow
+
+getYellowMainTime(): integer
+- Get the time the cross signal is yellow
+
+setYellowMainTime(value: integer)
+- Set the time the cross signal is yellow
+
+getAllRedTime(): integer
+- Get the time all signals are red
+
+setAllRedTime(value: integer)
+- Set the time all signals are red
+
+getLights(): boolean
+- Get whether the street lights are enabled
+
+getState(): table{name: opstate, mainSignal: lighttype, crossSignal: lighttype}
+- Get the current operation state of the signal controller
+
+getTimeOperationStarted(): decimal
+- Get the time since the last operation has started

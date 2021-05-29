@@ -6,12 +6,11 @@
     ],
     "key": {
         "A": {
-            "type": "forge:ore_dict",
-            "ore": "enderpearl"
+            "item": "minecraft:compass"
         },
         "B": {
             "type": "forge:ore_dict",
-            "ore": "oc:circuitChip2"
+            "ore": "dustRedstone"
         },
         "C": {
             "type": "forge:ore_dict",

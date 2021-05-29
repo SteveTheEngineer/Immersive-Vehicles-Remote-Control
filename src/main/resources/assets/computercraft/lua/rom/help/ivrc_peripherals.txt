@@ -1,0 +1,7 @@
+Note that all methods calls will get ignored if "isAvailable()" returns false.
+
+Type "help ivrc_decor" to learn about using Decor Interfaces.
+Type "help ivrc_fluidloader" to learn about using Fluid Loader Interfaces.
+Type "help ivrc_fuelpump" to learn about using Fuel Pump Interfaces.
+Type "help ivrc_signalcontroller" to learn about using Signal Controller Interfaces.
+Type "help ivrc_vehicle" to learn about using Vehicle Remote Interfaces.

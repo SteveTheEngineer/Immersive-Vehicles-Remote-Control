@@ -1,0 +1,15 @@
+The Decor Interface is a peripheral device available for CraftOS. Type "help peripheral" to learn about using the Peripheral API to connect with peripherals. When a Decor Interface is connected, peripheral.getType() will return "decor".
+The "axis" type is either "none", "up", "down", "north", "south", "east" or "west".
+
+Methods exposed by the Decor Interface:
+isAvailable(): boolean
+- Check whether a decor block is connected to the interface
+
+isPole(): boolean
+- Check whether the connected block is a pole
+
+getText(axis: axis): table{name: string = text: string}
+- Get the decor's text lines on the specified axis
+
+setText(axis: axis, name: string, value: string)
+- Set a decor's text line by it's index name on the specified axis

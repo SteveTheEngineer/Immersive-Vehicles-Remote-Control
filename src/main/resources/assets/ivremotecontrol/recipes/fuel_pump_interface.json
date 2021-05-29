@@ -1,22 +1,24 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "ACA",
-        "ABA",
-        "AAA"
+        "BAB",
+        "BCB",
+        "BDB"
     ],
     "key": {
         "A": {
-            "type": "forge:ore_dict",
-            "ore": "ingotGold"
+            "item": "minecraft:glass_bottle"
         },
         "B": {
             "type": "forge:ore_dict",
-            "ore": "oc:circuitChip1"
+            "ore": "ingotBrick"
         },
         "C": {
-            "type": "forge:ore_dict",
-            "ore": "dustRedstone"
+            "item": "minecraft:piston"
+        },
+        "D": {
+            "item": "computercraft:cable",
+            "data": 0
         }
     },
     "result": {

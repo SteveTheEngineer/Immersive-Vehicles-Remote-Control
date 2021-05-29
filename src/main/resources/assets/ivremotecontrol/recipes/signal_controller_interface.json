@@ -1,22 +1,25 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "ACA",
-        "ABA",
-        "AAA"
+        "BAB",
+        "BCB",
+        "BDB"
     ],
     "key": {
         "A": {
             "type": "forge:ore_dict",
-            "ore": "stone"
+            "ore": "dustGlowstone"
         },
         "B": {
             "type": "forge:ore_dict",
-            "ore": "oc:circuitChip1"
+            "ore": "ingotBrick"
         },
         "C": {
-            "type": "forge:ore_dict",
-            "ore": "dustGlowstone"
+            "item": "minecraft:piston"
+        },
+        "D": {
+            "item": "computercraft:cable",
+            "data": 0
         }
     },
     "result": {
