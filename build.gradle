@@ -117,3 +117,12 @@ processResources {
         exclude "mcmod.info"
     }
 }
+
+// Fix the extractRangemapReplacedMain task
+tasks.create("createDummySourcesDirectory") {
+    doLast {
+        mkdir "build/sources/main/java"
+    }
+}
+
+tasks.extractRangemapReplacedMain.dependsOn "createDummySourcesDirectory"
