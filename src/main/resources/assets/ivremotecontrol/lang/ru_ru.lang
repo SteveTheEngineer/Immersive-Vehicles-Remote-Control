@@ -1,7 +1,7 @@
 ﻿itemGroup.ivremotecontrol:tab=Immersive Vehicles Remote Control
 
 item.ivremotecontrol:vehicle_selector.unbound.name=Связыватель транспорта
-item.ivremotecontrol:vehicle_selector.bound.name=Vehicle Selection Tool (Bound)
+item.ivremotecontrol:vehicle_selector.bound.name=Связыватель транспорта (Привязан)
 item.ivremotecontrol:vehicle_selector.tooltip.help0=Нажмите ПКМ на транспортном средстве, чтобы привязать его
 item.ivremotecontrol:vehicle_selector.tooltip.help1=Нажмите Shift+ПКМ в пустоту, чтобы отвязать
 item.ivremotecontrol:vehicle_selector.tooltip.uuid=Выбранное транспортное средство: %s
