@@ -13,8 +13,8 @@ import net.minecraftforge.fml.common.network.NetworkRegistry
 @Mod(
     modid = IVRemoteControl.MOD_ID,
     name = "IV Remote Control",
-    version = "2.0",
-    dependencies = "required-after:computercraft@[1.89.2,);required-after:forgelin@[1.8.4,);required-after:mts@19.15.7;",
+    version = "2.1.1",
+    dependencies = "required-after:computercraft@[1.89.2,);required-after:forgelin@[1.8.4,);required-after:mts@20.1.0;",
     modLanguageAdapter = "net.shadowfacts.forgelin.KotlinAdapter"
 )
 object IVRemoteControl {

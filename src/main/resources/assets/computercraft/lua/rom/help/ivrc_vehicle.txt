@@ -81,26 +81,17 @@ setStarterActive(engineId: integer, value: boolean)
 shiftUp()
 - Shift the gears up
 
+shiftNeutral()
+- Switch the gears to neutral
+
 shiftDown()
 - Shift the gears down
-
-getLights(): table{light: string = value: boolean}
-- Get the states of all lights
-
-setLightActive(light: string, value: boolean)
-- Set the state of a light
 
 getDoors(): table{doorId: string = value: boolean}
 - Get the states of all doors
 
 setDoorOpen(doorId: string, value: boolean)
 - Set the state of a door
-
-getCruiseState(): boolean, decimal
-- Get the state of cruise control and it's target speed
-
-setCruiseActive(): boolean
-- Set the state of cruise control. When activated, the cruise control speed will be set to the current velocity
 
 isHornActive(): boolean
 - Check whether the horn is active
@@ -115,16 +106,20 @@ setThrustReversed(value: boolean)
 - Set the state of the reverse thrust on the vehicle
 
 isAutopilotActive(): boolean
+- DEPRECATED! Use getAutopilotState instead
 - Check whether autopilot is active
+
+getAutopilotState(): boolean, decimal, decimal
+- Get whether the autopilot is active, it's target altitude and speed
 
 setAutopilotActive(value: boolean)
 - Set the state of autopilot
 
-getFlapAngle(): integer, decimal
-- Get the target and the current angle of the flaps
+getFlapAngle(): integer, decimal, integer
+- Get the target angle, the current angle and the selected notch of the flaps
 
-setFlapAngle(value: integer)
-- Set the target angle of the flaps
+setFlapNotch(value: integer)
+- Set the flap notch to the specified value
 
 getAileronTrim(): integer
 - Get the aileron trim
@@ -174,9 +169,6 @@ getCustomVariables(): table{variableName: string = value: boolean}
 setCustomVariableActive(variableName: string, value: boolean)
 - Set the state of a custom variable
 
-getTrailer(): string, string
-- Get the entity UUID and the vehicle UUID of the trailer, or nothing if there's no trailer attached
-
 attachTrailer(): boolean, {string...}?
 - Attempt to attach a trailer. Returns true if a trailer was attached, or false and an array of possible issues otherwise
 
@@ -200,3 +192,27 @@ getGuns(): table{key: number = details: table}
 
 getConstants(): table{constantName: string = value: integer}
 - Get the values of Immersive Vehicles constants
+
+setFlapAngle(): error
+- THIS METHOD HAS BEEN REMOVED! Use setFlapNotch instead
+
+getLights(): error
+- THIS METHOD HAS BEEN REMOVED! Use getCustomVariables instead
+
+setLightActive(): error
+- THIS METHOD HAS BEEN REMOVED! Use setCustomVariableActive instead
+
+getCruiseState(): error
+- THIS METHOD HAS BEEN REMOVED! Use getAutopilotState instead
+
+setCruiseActive(): error
+- THIS METHOD HAS BEEN REMOVED! Use setAutopilotActive instead
+
+getTrailer(): error
+- THIS METHOD HAS BEEN REMOVED
+
+attachTrailer(): error
+- THIS METHOD HAS BEEN REMOVED!
+
+detachTrailer(): error
+- THIS METHOD HAS BEEN REMOVED!

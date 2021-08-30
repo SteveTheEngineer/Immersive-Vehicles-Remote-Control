@@ -2,7 +2,7 @@ package me.ste.ivremotecontrol.listener
 
 import me.ste.ivremotecontrol.item.VehicleSelectorItem
 import minecrafttransportsimulator.entities.instances.EntityVehicleF_Physics
-import minecrafttransportsimulator.mcinterface.BuilderEntity
+import minecrafttransportsimulator.mcinterface.BuilderEntityExisting
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.EnumActionResult
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
@@ -16,8 +16,8 @@ object ItemListener {
     @SubscribeEvent(priority = EventPriority.HIGH)
     fun onEntityInteract(event: PlayerInteractEvent.EntityInteract) {
         // Handle the interactions with vehicles
-        if (event.itemStack.item is VehicleSelectorItem && event.target is BuilderEntity) { // Check whether the item is a selector item, and the entity is an MTS entity
-            val entity = (event.target as BuilderEntity).entity
+        if (event.itemStack.item is VehicleSelectorItem && event.target is BuilderEntityExisting) { // Check whether the item is a selector item, and the entity is an MTS entity
+            val entity = (event.target as BuilderEntityExisting).entity
             if (entity is EntityVehicleF_Physics) { // Check whether the entity is a vehicle
                 if (!event.world.isRemote) { // Continue with binding the vehicle only if we're running the code at the server side
                     if (PermissionAPI.hasPermission( // Check whether the player has ivremotecontrol.force permission.
