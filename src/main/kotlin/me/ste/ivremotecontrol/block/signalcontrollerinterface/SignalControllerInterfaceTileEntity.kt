@@ -31,7 +31,22 @@ class SignalControllerInterfaceTileEntity : PeripheralTileEntity("signalcontroll
         this.controller?.let { arrayOf(it.mainDirectionAxis.name.toLowerCase()) }
 
     private fun setMainDirection(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.controller?.let { arrayOf() } // TODO
+        this.controller?.let {
+            val direction = ArgumentHelper.getString(args, 0)
+
+            when (direction.toLowerCase()) {
+                "north" -> it.mainDirectionAxis = ABlockBase.Axis.NORTH
+                "east" -> it.mainDirectionAxis = ABlockBase.Axis.EAST
+                "northeast" -> it.mainDirectionAxis = ABlockBase.Axis.NORTHEAST
+                "northwest" -> it.mainDirectionAxis = ABlockBase.Axis.NORTHWEST
+                else -> throw ArgumentHelper.badArgument(0, "a main direction", direction)
+            }
+
+            it.initializeController(null)
+            InterfacePacket.sendToAllClients(PacketTileEntitySignalControllerChange(it))
+
+            null
+        }
 
     private fun getMode(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.controller?.let { arrayOf(if(it.timedMode) "timed_cycle" else "vehicle_trigger") }
@@ -107,25 +122,54 @@ class SignalControllerInterfaceTileEntity : PeripheralTileEntity("signalcontroll
             null
         }
 
-    @Deprecated("removed")
+    @Deprecated("Removed")
     private fun getState(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.controller?.let { throw LuaException("removed method: getState") }
+        this.controller?.let { arrayOf(
+            hashMapOf(
+                "name" to "green_main_red_cross",
+                "mainSignal" to "golight",
+                "crossSignal" to "stoplight"
+            )
+        ) }
 
     @Deprecated("Removed")
     private fun getLights(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.controller?.let { throw LuaException("removed method: getLights") }
+        this.controller?.let { arrayOf(false) }
 
     @Deprecated("Removed")
     private fun getTimeOperationStarted(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.controller?.let { throw LuaException("removed method: getTimeOperationStarted") }
+        this.controller?.let { arrayOf(0) }
 
     @Deprecated("Use getMainDirection instead")
-    private fun getAxis(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Nothing? =
-        this.controller?.let { throw LuaException("removed method: getAxis") }
+    private fun getAxis(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
+        this.controller?.let {
+            arrayOf(
+                when (it.mainDirectionAxis) {
+                    ABlockBase.Axis.NORTH -> "z"
+                    ABlockBase.Axis.EAST -> "x"
+                    ABlockBase.Axis.NORTHEAST -> "x"
+                    ABlockBase.Axis.NORTHWEST -> "z"
+                    else -> "x"
+                }
+            )
+        }
 
     @Deprecated("Use setMainDirection instead")
     private fun setAxis(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.controller?.let { throw LuaException("removed method: setAxis") }
+        this.controller?.let {
+            val axis = ArgumentHelper.getString(args, 0)
+
+            when (axis.toLowerCase()) {
+                "x" -> it.mainDirectionAxis = ABlockBase.Axis.EAST
+                "z" -> it.mainDirectionAxis = ABlockBase.Axis.NORTH
+                else -> throw ArgumentHelper.badArgument(0, "an axis", axis)
+            }
+
+            it.initializeController(null)
+            InterfacePacket.sendToAllClients(PacketTileEntitySignalControllerChange(it))
+
+            null
+        }
 
     init {
         this.methods["isAvailable"] = this::isAvailable

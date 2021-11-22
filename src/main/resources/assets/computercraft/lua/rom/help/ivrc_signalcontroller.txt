@@ -1,8 +1,7 @@
 The Signal Controller Interface is a peripheral device available for CraftOS. Type "help peripheral" to learn about using the Peripheral API to connect with peripherals. When a Signal Controller Interface is connected, peripheral.getType() will return "signalcontroller".
 The "opmode" type is either "timed_cycle" or "vehicle_trigger".
-The "opstate" type is either "green_main_red_cross", "yellow_main_red_cross", "red_main_red_cross", "red_main_green_cross", "red_main_yellow_cross" or "red_main2_red_cross2".
-The "lighttype" type is either "golight", "cautionlight" or "stoplight".
 The "maindirection" type is either "north", "east", "northeast" or "northwest".
+The "legacyaxis" type is either "x" or "z".
 All methods here involving time are using the units of seconds.
 
 Methods exposed by the Signal Controller Interface:
@@ -48,17 +47,22 @@ getAllRedTime(): integer
 setAllRedTime(value: integer)
 - Set the time all signals are red
 
-getState(): error
-- THIS METHOD HAS BEEN REMOVED!
+getState(): {name: "green_main_red_cross", mainSignal: "golight", crossSignal: "stoplight"}
+- DEPRECATED! An alternative to this method may be added in the future
+- This method always returns {name: "green_main_red_cross", mainSignal: "golight", crossSignal: "stoplight"}
 
-getAxis(): error
-- THIS METHOD HAS BEEN REMOVED! Use getMainDirection instead
+getAxis(): legacyaxis
+- DEPRECATED! Use getMainDirection instead
+- This method returns the closest legacy axis to the main direction
 
-setAxis(): error
-- THIS METHOD HAS BEEN REMOVED! Use setMainDirection instead
+setAxis(value: legacyaxis)
+- DEPRECATED! Use setMainDirection instead
+- This method will set the main direction to "east" if the provided axis is "x", or "north" if the axis is "z"
 
-getLights(): error
-- THIS METHOD HAS BEEN REMOVED!
+getLights(): false
+- DEPRECATED! An alternative to this method may be added in the future
+- This method always returns false
 
-getTimeOperationStarted(): error
-- THIS METHOD HAS BEEN REMOVED!
+getTimeOperationStarted(): 0
+- DEPRECATED! An alternative to this method may be added in the future
+- This method always returns 0

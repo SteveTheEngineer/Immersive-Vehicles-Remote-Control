@@ -1,15 +1,13 @@
 The Fluid Loader Interface is a peripheral device available for CraftOS. Type "help peripheral" to learn about using the Peripheral API to connect with peripherals. When a Fluid Loader Interface is connected, peripheral.getType() will return "fluidloader".
-The "mode" type is either "load" or "unload".
+The "legacymode" type is either "load" or "unload".
+The "loadertype" type is either "loader" or "unloader"
 
 Methods exposed by the Fluid Loader Interface:
 isAvailable(): boolean
 - Check whether a fluid loader is connected to the interface
 
-getMode(): mode
-- Get the fluid loader mode
-
-setMode(value: mode)
-- Set the fluid loader mode
+getType(): loadertype
+- Get the type of the fluid loader
 
 getFluid(): string, integer, integer
 - Get the fluid name, fluid level and the max fluid level
@@ -19,3 +17,11 @@ isConnected(): boolean
 
 getConnectedVehicle(): string, string
 - Get the entity and vehicle UUID of the connected vehicle, or nothing if nothing is connected
+
+setMode()
+- DEPRECATED! This method has been removed
+- This method does nothing
+
+getMode(): legacymode
+- DEPRECATED! Use getType instead
+- Get the fluid loader mode

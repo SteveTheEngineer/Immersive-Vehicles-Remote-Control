@@ -10,6 +10,7 @@ import me.ste.ivremotecontrol.constants.IVRCConstants
 import me.ste.ivremotecontrol.item.VehicleSelectorItem
 import me.ste.ivremotecontrol.util.MTSUtil
 import me.ste.ivremotecontrol.util.SerializationUtil
+import me.ste.ivremotecontrol.util.VehicleLight
 import minecrafttransportsimulator.baseclasses.NavBeacon
 import minecrafttransportsimulator.entities.components.AEntityA_Base
 import minecrafttransportsimulator.entities.instances.EntityVehicleF_Physics
@@ -26,6 +27,7 @@ import net.minecraft.util.EnumFacing
 import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.items.CapabilityItemHandler
 import net.minecraftforge.items.ItemStackHandler
+import kotlin.math.abs
 
 class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
     private val inventory = ItemStackHandler(1)
@@ -317,14 +319,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
     private fun setParkingBrakeActive(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
             val parkingBrake = ArgumentHelper.getBoolean(args, 0)
-            it.parkingBrakeOn = parkingBrake
-            InterfacePacket.sendToAllClients(
-                PacketVehicleControlDigital(
-                    vehicle,
-                    PacketVehicleControlDigital.Controls.P_BRAKE,
-                    it.parkingBrakeOn
-                )
-            )
+            this.setVariable(it, EntityVehicleF_Physics.PARKINGBRAKE_VARIABLE, parkingBrake)
             null
         }
 
@@ -378,70 +373,92 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
         this.vehicle?.let {
             for (engine in it.engines.values) {
                 if (engine.shiftDown(false)) {
-                    InterfacePacket.sendToAllClients(PacketPartEngine(engine, PacketPartEngine.Signal.SHIFT_UP_MANUAL))
+                    InterfacePacket.sendToAllClients(PacketPartEngine(engine, PacketPartEngine.Signal.SHIFT_DN_MANUAL))
                 }
             }
             null
         }
 
-    @Deprecated("Removed")
+    @Deprecated("Use getLights2 instead")
     private fun getLights(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { throw LuaException("removed method: getLights") }
-
-    @Deprecated("Removed")
-    private fun setLightActive(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { throw LuaException("removed method: setLightActive") }
-
-    private fun getDoors(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let { vehicle ->
-            vehicle.definition.doors?.let { door ->
-                arrayOf(
-                    hashMapOf(*(door.map { it.name to (it.name in vehicle.variablesOn) }).toTypedArray())
-                )
+            arrayOf(
+                hashMapOf(*VehicleLight.values().map {
+                    it.legacyName.toLowerCase() to (it.variable in vehicle.variablesOn)
+                }.toTypedArray())
+            )
+        }
+
+    private fun getLights2(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
+        this.vehicle?.let { vehicle ->
+            arrayOf(
+                hashMapOf(*VehicleLight.values().map {
+                    it.name.toLowerCase() to (it.variable in vehicle.variablesOn)
+                }.toTypedArray())
+            )
+        }
+
+    private fun setLightActive(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
+        this.vehicle?.let {
+            val lightString = ArgumentHelper.getString(args, 0)
+            val value = ArgumentHelper.getBoolean(args, 1)
+
+            val light = VehicleLight.match(lightString)
+                ?: throw ArgumentHelper.badArgument(0, "a vehicle light", lightString)
+
+            this.setVariable(it, light.variable, value)
+
+            null
+        }
+
+    private fun getInteractionVariableStates(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
+        this.vehicle?.let { vehicle ->
+            vehicle.definition.collisionGroups?.let { groups ->
+                val states: MutableMap<String, Boolean> = HashMap()
+
+                for (group in groups) {
+                    for (box in group.collisions) {
+                        if (box.variableName == null) {
+                            continue
+                        }
+
+                        states[box.variableName] = box.variableName in vehicle.variablesOn
+                    }
+                }
+
+                arrayOf(states)
             }
         }
 
-    private fun setDoorOpen(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
+    private fun setInteractionVariableActive(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let { vehicle ->
             val name = ArgumentHelper.getString(args, 0)
             val value = ArgumentHelper.getBoolean(args, 1)
 
-            vehicle.definition.doors?.let {
-                for (door in it) {
-                    if (door.name == name) {
-                        this.setVariable(vehicle, name, value)
-                        break
-                    }
+            vehicle.definition.collisionGroups?.let { groups ->
+                for (group in groups) {
+                     for (box in group.collisions) {
+                         if (box.variableName == name) {
+                             this.setVariable(vehicle, box.variableName, value)
+                         }
+                     }
                 }
             }
 
             null
         }
 
-    @Deprecated("Removed")
+    @Deprecated("Use getAutopilotState instead")
     private fun getCruiseState(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { throw LuaException("removed method: getCruiseState") }
-
-    @Deprecated("Removed")
-    private fun setCruiseActive(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { throw LuaException("removed method: setCruiseActive") }
+        this.vehicle?.let { arrayOf(it.autopilot, it.speedSetting) }
 
     private fun isHornActive(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { arrayOf(it.hornOn) }
+        this.vehicle?.let { arrayOf(EntityVehicleF_Physics.HORN_VARIABLE in it.variablesOn) }
 
     private fun setHornActive(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
             val value = ArgumentHelper.getBoolean(args, 0)
-
-            it.hornOn = value
-            InterfacePacket.sendToAllClients(
-                PacketVehicleControlDigital(
-                    vehicle,
-                    PacketVehicleControlDigital.Controls.HORN,
-                    value
-                )
-            )
-
+            this.setVariable(it, EntityVehicleF_Physics.HORN_VARIABLE, value)
             null
         }
 
@@ -463,9 +480,6 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
             }
             null
         }
-
-    private fun isAutopilotActive(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { arrayOf(it.autopilot) }
 
     private fun setAutopilotActive(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
@@ -496,10 +510,6 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
                 it.flapNotchSelected
             )
         }
-
-    @Deprecated("Removed")
-    private fun setFlapAngle(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { throw LuaException("removed method: setFlapAngle") }
 
     private fun getAileronTrim(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let { arrayOf(it.aileronTrim) }
@@ -643,21 +653,12 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
         }
 
     private fun getLandingGearState(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { arrayOf(it.gearUpCommand, it.gearMovementTime) }
+        this.vehicle?.let { arrayOf(EntityVehicleF_Physics.GEAR_VARIABLE in it.variablesOn, it.gearMovementTime) }
 
     private fun setLandingGearDeployed(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
             val value = ArgumentHelper.getBoolean(args, 0)
-
-            it.gearUpCommand = value
-            InterfacePacket.sendToAllClients(
-                PacketVehicleControlDigital(
-                    it,
-                    PacketVehicleControlDigital.Controls.GEAR,
-                    value
-                )
-            )
-
+            this.setVariable(it, EntityVehicleF_Physics.GEAR_VARIABLE, value)
             null
         }
 
@@ -682,17 +683,42 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
             null
         }
 
+    @Deprecated("Use setFlapNotch instead")
+    private fun setFlapAngle(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
+        this.vehicle?.let {
+            it.definition.motorized.flapNotches?.let { notches ->
+                val requestedAngle = ArgumentHelper.getDouble(args, 0)
+                var closestNotch = -1
+                var minDifference = -1.0
+
+                for ((notch, angle) in notches.withIndex()) {
+                    val difference = abs(angle - requestedAngle)
+                    if (minDifference < 0 || difference <= minDifference) {
+                        closestNotch = notch
+                        minDifference = difference
+                    }
+                }
+
+                if (closestNotch != -1) {
+                    this.setFlapNotchInternal(it, closestNotch)
+                }
+            }
+            null
+        }
+
+    @Deprecated("Use getAutopilotState instead")
+    private fun isAutopilotActive(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
+        this.vehicle?.let { arrayOf(it.autopilot) }
+
     @Deprecated("Removed")
-    private fun getTrailer(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { throw LuaException("removed method: getTrailer") }
+    private fun getTrailer(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? = null
 
     @Deprecated("Removed")
     private fun attachTrailer(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { throw LuaException("removed method: attachTrailer") }
+        this.vehicle?.let { arrayOf(false, "no_trailer_nearby") }
 
     @Deprecated("Removed")
-    private fun detachTrailer(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { throw LuaException("removed method: detachTrailer") }
+    private fun detachTrailer(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? = null
 
     private fun getTextEntries(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let { vehicle ->
@@ -775,9 +801,9 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
                             "bulletsLeft" to it.bulletsLeft,
                             "firing" to it.ticksFiring,
                             "rotation" to arrayOf(
-                                it.currentOrientation.x,
-                                it.currentOrientation.y,
-                                it.currentOrientation.z
+                                it.rotation.x,
+                                it.rotation.y,
+                                it.rotation.z
                             ),
                             "position" to arrayOf(it.position.x, it.position.y, it.position.z)
                         )
@@ -816,19 +842,24 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
 
     private fun setFlapNotch(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
-            val notch = ArgumentHelper.getInt(args, 0).coerceAtLeast(0).coerceAtMost(it.definition.motorized.flapNotches.size - 1)
-
-            while (it.flapNotchSelected < notch) {
-                it.flapNotchSelected++
-                InterfacePacket.sendToAllClients(PacketVehicleControlDigital(it, PacketVehicleControlDigital.Controls.FLAPS, true))
-            }
-            while (it.flapNotchSelected > notch) {
-                it.flapNotchSelected--
-                InterfacePacket.sendToAllClients(PacketVehicleControlDigital(it, PacketVehicleControlDigital.Controls.FLAPS, false))
+            it.definition.motorized.flapNotches?.let { flapNotches ->
+                val notch = ArgumentHelper.getInt(args, 0)
+                this.setFlapNotchInternal(it, notch)
             }
 
             null
         }
+
+    private fun setFlapNotchInternal(vehicle: EntityVehicleF_Physics, notch: Int) {
+        while (vehicle.flapNotchSelected < notch && vehicle.flapNotchSelected < vehicle.definition.motorized.flapNotches.size) {
+            vehicle.flapNotchSelected++
+            InterfacePacket.sendToAllClients(PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.FLAPS, true))
+        }
+        while (vehicle.flapNotchSelected > notch && vehicle.flapNotchSelected > 0) {
+            vehicle.flapNotchSelected--
+            InterfacePacket.sendToAllClients(PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.FLAPS, false))
+        }
+    }
 
     init {
         this.methods["isAvailable"] = this::isAvailable
@@ -858,17 +889,18 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
         this.methods["shiftUp"] = this::shiftUp
         this.methods["shiftNeutral"] = this::shiftNeutral
         this.methods["shiftDown"] = this::shiftDown
-        this.methods["getDoors"] = this::getDoors
-        this.methods["setDoorOpen"] = this::setDoorOpen
+        this.methods["getInteractionVariableStates"] = this::getInteractionVariableStates
+        this.methods["setInteractionVariableActive"] = this::setInteractionVariableActive
         this.methods["isHornActive"] = this::isHornActive
         this.methods["setHornActive"] = this::setHornActive
         this.methods["isThrustReversed"] = this::isThrustReversed
         this.methods["setThrustReversed"] = this::setThrustReversed
-        this.methods["isAutopilotActive"] = this::isAutopilotActive
         this.methods["setAutopilotActive"] = this::setAutopilotActive
         this.methods["getFlapAngle"] = this::getFlapAngle
         this.methods["getAutopilotState"] = this::getAutopilotState
         this.methods["setFlapNotch"] = this::setFlapNotch
+        this.methods["getLights"] = this::getLights
+        this.methods["setLightActive"] = this::setLightActive
 
         this.methods["getAileronTrim"] = this::getAileronTrim
         this.methods["setAileronTrim"] = this::setAileronTrim
@@ -899,13 +931,14 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
 
         this.methods["getConstants"] = this::getConstants
 
+        this.methods["setCruiseActive"] = this::setAutopilotActive // Deprecated
+        this.methods["getDoors"] = this::getInteractionVariableStates // Deprecated
+        this.methods["setDoorOpen"] = this::setInteractionVariableActive // Deprecated
+        this.methods["getCruiseState"] = this::getCruiseState
+        this.methods["isAutopilotActive"] = this::isAutopilotActive
+        this.methods["setFlapAngle"] = this::setFlapAngle
         this.methods["getTrailer"] = this::getTrailer
         this.methods["attachTrailer"] = this::attachTrailer
         this.methods["detachTrailer"] = this::detachTrailer
-        this.methods["getCruiseState"] = this::getCruiseState
-        this.methods["getLights"] = this::getLights
-        this.methods["setLightActive"] = this::setLightActive
-        this.methods["setCruiseActive"] = this::setCruiseActive
-        this.methods["setFlapAngle"] = this::setFlapAngle
     }
 }

@@ -87,11 +87,21 @@ shiftNeutral()
 shiftDown()
 - Shift the gears down
 
-getDoors(): table{doorId: string = value: boolean}
-- Get the states of all doors
+getInteractionVariableStates(): table{name: string = value: boolean}
+- Get the states of the interaction variables on the vehicle
+- These variables aren't called "interaction variables" by Immersive Vehicles itself, but is rather a name I thought would be the most fitting for them
+- The interaction variables are normally changed by interacting with the vehicle physically (e.g. opening/closing doors)
 
-setDoorOpen(doorId: string, value: boolean)
-- Set the state of a door
+setInteractionVariableActive(name: string, value: boolean)
+- Set the state of an interaction variable. What they are is described in the getInteractionVariableStates documentation
+- The available interaction variables can be acquired by calling getInteractionVariableStates
+
+getLights2(): table{light: vehiclelight = value: boolean}
+- Get the states of all lights
+
+setLightActive(light: vehiclelight, value: boolean)
+- Set the state of a light
+- The available lights can be acquired by calling getLights
 
 isHornActive(): boolean
 - Check whether the horn is active
@@ -104,10 +114,6 @@ isThrustReversed(): boolean
 
 setThrustReversed(value: boolean)
 - Set the state of the reverse thrust on the vehicle
-
-isAutopilotActive(): boolean
-- DEPRECATED! Use getAutopilotState instead
-- Check whether autopilot is active
 
 getAutopilotState(): boolean, decimal, decimal
 - Get whether the autopilot is active, it's target altitude and speed
@@ -168,6 +174,7 @@ getCustomVariables(): table{variableName: string = value: boolean}
 
 setCustomVariableActive(variableName: string, value: boolean)
 - Set the state of a custom variable
+- The available custom variables can be acquired by calling getCustomVariables
 
 attachTrailer(): boolean, {string...}?
 - Attempt to attach a trailer. Returns true if a trailer was attached, or false and an array of possible issues otherwise
@@ -193,26 +200,42 @@ getGuns(): table{key: number = details: table}
 getConstants(): table{constantName: string = value: integer}
 - Get the values of Immersive Vehicles constants
 
-setFlapAngle(): error
-- THIS METHOD HAS BEEN REMOVED! Use setFlapNotch instead
+getLights(): table{light: string = value: boolean}
+- DEPRECATED! Use getLights2 instead
+- This method returns the legacy light names
 
-getLights(): error
-- THIS METHOD HAS BEEN REMOVED! Use getCustomVariables instead
+getDoors(): table{doorId: string = value: boolean}
+- DEPRECATED! Use getInteractionVariableStates instead
+- This method is an alias for getInteractionVariableStates
 
-setLightActive(): error
-- THIS METHOD HAS BEEN REMOVED! Use setCustomVariableActive instead
+setDoorOpen(doorId: string, value: boolean)
+- DEPRECATED! Use setInteractionVariableActive instead
+- This method is an alias for setInteractionVariableActive
 
-getCruiseState(): error
-- THIS METHOD HAS BEEN REMOVED! Use getAutopilotState instead
+isAutopilotActive(): boolean
+- DEPRECATED! Use getAutopilotState instead
+- This method returns the autopilot state
 
-setCruiseActive(): error
-- THIS METHOD HAS BEEN REMOVED! Use setAutopilotActive instead
+getCruiseState(): boolean, decimal
+- DEPRECATED! Use getAutopilotState instead
+- This method returns the autopilot state and the desired speed
 
-getTrailer(): error
-- THIS METHOD HAS BEEN REMOVED
+setCruiseActive(value: boolean)
+- DEPRECATED! Use setAutopilotActive instead
+- This method is an alias for setAutopilotActive
 
-attachTrailer(): error
-- THIS METHOD HAS BEEN REMOVED!
+setFlapAngle(value: decimal)
+- DEPRECATED! Use setFlapNotch instead
+- This method chooses the flap notch closest to the provided angle
 
-detachTrailer(): error
-- THIS METHOD HAS BEEN REMOVED!
+getTrailer()
+- DEPRECATED! An alternative to this method may be added in the future
+- This method always returns nothing
+
+attachTrailer(): false, "no_trailer_nearby"
+- DEPRECATED! An alternative to this method may be added in the future
+- This method always returns false, "no_trailer_nearby"
+
+detachTrailer()
+- DEPRECATED! An alternative to this method may be added in the future
+- This method does nothing

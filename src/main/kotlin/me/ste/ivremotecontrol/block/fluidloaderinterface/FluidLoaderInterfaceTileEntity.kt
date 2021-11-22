@@ -2,6 +2,7 @@ package me.ste.ivremotecontrol.block.fluidloaderinterface
 
 import dan200.computercraft.api.lua.ArgumentHelper
 import dan200.computercraft.api.lua.ILuaContext
+import dan200.computercraft.api.lua.LuaException
 import dan200.computercraft.api.peripheral.IComputerAccess
 import me.ste.ivremotecontrol.block.peripheral.PeripheralTileEntity
 import me.ste.ivremotecontrol.util.MTSUtil
@@ -24,19 +25,6 @@ class FluidLoaderInterfaceTileEntity : PeripheralTileEntity("fluidloader") {
     private fun isAvailable(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any> =
         arrayOf(this.loader != null)
 
-    private fun getMode(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.loader?.let { arrayOf(if (it.unloadMode) "unload" else "load") }
-
-    private fun setMode(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? = this.loader?.let {
-        val mode = ArgumentHelper.getString(args, 0)
-        when (mode.toLowerCase()) {
-            "load" -> it.unloadMode = false
-            "unload" -> it.unloadMode = true
-            else -> throw ArgumentHelper.badArgument(0, "a mode", mode)
-        }
-        null
-    }
-
     private fun getFluid(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.loader?.let { arrayOf(it.tank.fluid, it.tank.fluidLevel, it.tank.maxLevel) }
 
@@ -55,12 +43,24 @@ class FluidLoaderInterfaceTileEntity : PeripheralTileEntity("fluidloader") {
             }
         }
 
+    @Deprecated("Use getType instead")
+    private fun getMode(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
+        this.loader?.let { arrayOf(if (it.isUnloader) "unload" else "load") }
+
+    private fun getType(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
+        this.loader?.let { arrayOf(if (it.isUnloader) "unloader" else "loader") }
+
+    @Deprecated("Removed")
+    private fun setMode(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? = null
+
     init {
         this.methods["isAvailable"] = this::isAvailable
-        this.methods["getMode"] = this::getMode
-        this.methods["setMode"] = this::setMode
         this.methods["getFluid"] = this::getFluid
         this.methods["isConnected"] = this::isConnected
         this.methods["getConnectedVehicle"] = this::getConnectedVehicle
+        this.methods["getType"] = this::getType
+
+        this.methods["getMode"] = this::getMode
+        this.methods["setMode"] = this::setMode
     }
 }

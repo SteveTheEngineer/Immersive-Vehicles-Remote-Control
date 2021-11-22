@@ -19,7 +19,7 @@ apply plugin: "net.minecraftforge.gradle.forge"
 apply plugin: "kotlin"
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
-version = "2.1.1"
+version = "2.2"
 group = "me.ste" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "ivremotecontrol"
 
@@ -79,7 +79,7 @@ dependencies {
     implementation "org.squiddev:cc-tweaked-1.12.2:1.89.2"
     implementation "net.shadowfacts:Forgelin:1.8.4"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.3.40"
-    implementation "curse.maven:minecraft-transport-simulator-286703:3443212"
+    implementation "curse.maven:minecraft-transport-simulator-286703:3494111"
 }
 
 processResources {
