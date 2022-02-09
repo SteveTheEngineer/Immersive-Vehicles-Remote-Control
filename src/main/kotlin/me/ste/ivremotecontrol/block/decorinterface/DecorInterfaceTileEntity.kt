@@ -7,11 +7,12 @@ import me.ste.ivremotecontrol.block.decorinterface.decor.Decor
 import me.ste.ivremotecontrol.block.decorinterface.decor.TileEntityDecorWrapper
 import me.ste.ivremotecontrol.block.decorinterface.decor.TileEntityPoleWrapper
 import me.ste.ivremotecontrol.block.peripheral.PeripheralTileEntity
+import me.ste.ivremotecontrol.util.mtsTileEntity
 import minecrafttransportsimulator.blocks.components.ABlockBase
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityDecor
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityPole
 import minecrafttransportsimulator.mcinterface.BuilderTileEntity
-import minecrafttransportsimulator.packets.components.InterfacePacket
+import minecrafttransportsimulator.mcinterface.InterfacePacket
 import net.minecraft.block.BlockDirectional
 
 
@@ -23,7 +24,7 @@ class DecorInterfaceTileEntity : PeripheralTileEntity("decor") {
             if (tileEntity !is BuilderTileEntity<*>) {
                 return null
             }
-            val base = tileEntity.tileEntity
+            val base = tileEntity.mtsTileEntity
             return when (base) {
                 is TileEntityDecor -> TileEntityDecorWrapper(base)
                 is TileEntityPole -> TileEntityPoleWrapper(base)

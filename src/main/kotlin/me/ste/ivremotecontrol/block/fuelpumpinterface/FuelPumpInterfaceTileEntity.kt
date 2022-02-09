@@ -4,12 +4,16 @@ import dan200.computercraft.api.lua.ILuaContext
 import dan200.computercraft.api.peripheral.IComputerAccess
 import me.ste.ivremotecontrol.block.peripheral.PeripheralTileEntity
 import me.ste.ivremotecontrol.util.MTSUtil
+import me.ste.ivremotecontrol.util.mtsEntity
+import me.ste.ivremotecontrol.util.mtsTileEntity
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityFuelPump
 import minecrafttransportsimulator.entities.components.AEntityA_Base
+import minecrafttransportsimulator.entities.components.AEntityB_Existing
 import minecrafttransportsimulator.entities.instances.EntityVehicleF_Physics
 import minecrafttransportsimulator.entities.instances.PartEngine
+import minecrafttransportsimulator.mcinterface.BuilderEntityExisting
 import minecrafttransportsimulator.mcinterface.BuilderTileEntity
-import minecrafttransportsimulator.packets.components.InterfacePacket
+import minecrafttransportsimulator.mcinterface.InterfacePacket
 import minecrafttransportsimulator.packets.instances.PacketTileEntityFuelPumpConnection
 import minecrafttransportsimulator.systems.ConfigSystem
 import net.minecraft.block.BlockDirectional
@@ -23,7 +27,7 @@ class FuelPumpInterfaceTileEntity : PeripheralTileEntity("fuelpump") {
             if (tileEntity !is BuilderTileEntity<*>) {
                 return null
             }
-            return tileEntity.tileEntity as? TileEntityFuelPump
+            return tileEntity.mtsTileEntity as? TileEntityFuelPump
         }
 
     private val nearestVehicle: EntityVehicleF_Physics?
@@ -31,12 +35,17 @@ class FuelPumpInterfaceTileEntity : PeripheralTileEntity("fuelpump") {
             var vehicle: EntityVehicleF_Physics? = null
             var distance = 16.0
 
-            for (entity in AEntityA_Base.getEntities(it.world)) {
-                if (entity is EntityVehicleF_Physics) {
-                    val vehicleDistance = entity.position.distanceTo(it.position)
-                    if (vehicleDistance < distance) {
-                        distance = vehicleDistance
-                        vehicle = entity
+
+            for (entity in world.loadedEntityList) {
+                if (entity is BuilderEntityExisting) {
+                    val mtsEntity = entity.mtsEntity
+
+                    if (mtsEntity is EntityVehicleF_Physics) {
+                        val vehicleDistance = mtsEntity.position.distanceTo(it.position)
+                        if (vehicleDistance < distance) {
+                            distance = vehicleDistance
+                            vehicle = mtsEntity
+                        }
                     }
                 }
             }

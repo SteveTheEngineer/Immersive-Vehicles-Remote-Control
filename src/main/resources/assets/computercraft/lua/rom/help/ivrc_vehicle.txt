@@ -2,8 +2,10 @@ The Vehicle Remote Interface is a peripheral device available for CraftOS. Type 
 All methods here involving time are using the units of seconds.
 All methods here involving angles are using the units of degrees.
 The bounds for the flap angle, angles and their trims can be found by calling "getConstants()".
-The maximum value for angle cooldowns is 6.35 seconds.
 Cooldown of an angle is the time that has to pass until the angle is reset to 0.
+
+NOTE ON THE ANGLES:
+The angles must be set as often as possible (preferably every tick), since they will slowly reset to zero.
 
 Methods exposed by the Vehicle Remote Interface:
 isAvailable(): boolean
@@ -133,8 +135,9 @@ getAileronTrim(): integer
 setAileronTrim(value: integer)
 - Set the aileron trim
 
-getAileronAngle(): decimal, decimal
+getAileronAngle(): decimal
 - Get the actual aileron angle and the left cooldown
+- WARNING! This method actually returns a second value that is always zero for compatibility reasons.
 
 setAileronAngle(value: decimal, cooldown: decimal)
 - Set the aileron angle
@@ -145,8 +148,9 @@ getElevatorTrim(): integer
 setElevatorTrim(value: integer)
 - Set the elevator trim
 
-getElevatorAngle(): decimal, decimal
+getElevatorAngle(): decimal
 - Get the actual elevator angle and the left cooldown
+- WARNING! This method actually returns a second value that is always zero for compatibility reasons.
 
 setElevatorAngle(value: decimal, cooldown: decimal)
 - Set the elevator angle
@@ -157,10 +161,11 @@ getRudderTrim(): integer
 setRudderTrim(value: integer)
 - Set the rudder trim
 
-getRudderAngle(): decimal, decimal
-- Get the actual rudder angle and the left cooldown
+getRudderAngle(): decimal
+- Get the actual rudder angle
+- WARNING! This method actually returns a second value that is always zero for compatibility reasons.
 
-setRudderAngle(value: decimal, cooldown: decimal)
+setRudderAngle(value: decimal)
 - Set the rudder angle
 
 getLandingGearState(): boolean, integer

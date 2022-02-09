@@ -6,10 +6,11 @@ import dan200.computercraft.api.lua.LuaException
 import dan200.computercraft.api.peripheral.IComputerAccess
 import me.ste.ivremotecontrol.block.peripheral.PeripheralTileEntity
 import me.ste.ivremotecontrol.constants.IVRCConstants
+import me.ste.ivremotecontrol.util.mtsTileEntity
 import minecrafttransportsimulator.blocks.components.ABlockBase
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntitySignalController
 import minecrafttransportsimulator.mcinterface.BuilderTileEntity
-import minecrafttransportsimulator.packets.components.InterfacePacket
+import minecrafttransportsimulator.mcinterface.InterfacePacket
 import minecrafttransportsimulator.packets.instances.PacketTileEntitySignalControllerChange
 import net.minecraft.block.BlockDirectional
 
@@ -21,7 +22,7 @@ class SignalControllerInterfaceTileEntity : PeripheralTileEntity("signalcontroll
             if (tileEntity !is BuilderTileEntity<*>) {
                 return null
             }
-            return tileEntity.tileEntity as? TileEntitySignalController
+            return tileEntity.mtsTileEntity as? TileEntitySignalController
         }
 
     private fun isAvailable(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any> =

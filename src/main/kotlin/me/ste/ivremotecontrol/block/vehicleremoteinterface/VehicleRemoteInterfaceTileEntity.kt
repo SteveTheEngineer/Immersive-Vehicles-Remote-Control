@@ -2,32 +2,31 @@ package me.ste.ivremotecontrol.block.vehicleremoteinterface
 
 import dan200.computercraft.api.lua.ArgumentHelper
 import dan200.computercraft.api.lua.ILuaContext
-import dan200.computercraft.api.lua.LuaException
 import dan200.computercraft.api.peripheral.IComputerAccess
 import me.ste.ivremotecontrol.block.peripheral.PeripheralTileEntity
 import me.ste.ivremotecontrol.constants.IVRCConfiguration
 import me.ste.ivremotecontrol.constants.IVRCConstants
 import me.ste.ivremotecontrol.item.VehicleSelectorItem
-import me.ste.ivremotecontrol.util.MTSUtil
-import me.ste.ivremotecontrol.util.SerializationUtil
-import me.ste.ivremotecontrol.util.VehicleLight
+import me.ste.ivremotecontrol.util.*
 import minecrafttransportsimulator.baseclasses.NavBeacon
-import minecrafttransportsimulator.entities.components.AEntityA_Base
+import minecrafttransportsimulator.entities.components.AEntityD_Definable
+import minecrafttransportsimulator.entities.components.AEntityF_Multipart
 import minecrafttransportsimulator.entities.instances.EntityVehicleF_Physics
+import minecrafttransportsimulator.entities.instances.EntityVehicleF_Physics.*
+import minecrafttransportsimulator.entities.instances.PartEngine
 import minecrafttransportsimulator.entities.instances.PartGroundDevice
 import minecrafttransportsimulator.entities.instances.PartGun
 import minecrafttransportsimulator.mcinterface.BuilderEntityExisting
+import minecrafttransportsimulator.mcinterface.InterfacePacket
 import minecrafttransportsimulator.mcinterface.WrapperPlayer
-import minecrafttransportsimulator.mcinterface.WrapperWorld
-import minecrafttransportsimulator.packets.components.InterfacePacket
 import minecrafttransportsimulator.packets.instances.*
-import minecrafttransportsimulator.systems.NavBeaconSystem
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.EnumFacing
 import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.items.CapabilityItemHandler
 import net.minecraftforge.items.ItemStackHandler
 import kotlin.math.abs
+
 
 class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
     private val inventory = ItemStackHandler(1)
@@ -62,7 +61,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
                     for (world in this.world.minecraftServer!!.worlds) {
                         for (entity in world.loadedEntityList) {
                             if (entity is BuilderEntityExisting) {
-                                val vehicle = entity.entity
+                                val vehicle = entity.mtsEntity
                                 if (vehicle is EntityVehicleF_Physics) {
                                     val source: String
                                     var match: String
@@ -72,7 +71,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
                                             match = compound.getString("EntityUUID")
                                         }
                                         IVRCConfiguration.LookupValue.VEHICLE -> {
-                                            source = vehicle.uniqueUUID
+                                            source = vehicle.uniqueUUID.toString()
                                             match = compound.getString("VehicleUUID")
                                         }
                                     }
@@ -89,83 +88,37 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
         }
 
     // Utility methods
-    private fun setTrim(
-        vehicle: EntityVehicleF_Physics,
-        packet: PacketVehicleControlDigital.Controls,
-        set: (value: Short) -> Unit,
-        get: () -> Short,
-        step: Short,
-        min: Short,
-        max: Short,
-        value: Int
-    ) {
-        val realValue = -(min / step).coerceAtLeast(
-            (max / step).coerceAtMost(value)
-        ) * step
-
-        while (get() < realValue) {
-            set((vehicle.flapDesiredAngle + step).toShort())
-            InterfacePacket.sendToAllClients(
-                PacketVehicleControlDigital(
-                    vehicle,
-                    packet,
-                    true
-                )
-            )
-        }
-        while (get() > realValue) {
-            set((vehicle.flapDesiredAngle - step).toShort())
-            InterfacePacket.sendToAllClients(
-                PacketVehicleControlDigital(
-                    vehicle,
-                    packet,
-                    false
-                )
-            )
-        }
-    }
-
     private fun setAngle(
         vehicle: EntityVehicleF_Physics,
-        packet: PacketVehicleControlAnalog.Controls,
-        currentValue: Short,
-        setValue: (value: Short) -> Unit,
-        setCooldown: (value: Byte) -> Unit,
-        max: Short,
-        step: Short,
-        value: Double,
-        cooldown: Double
+        variableName: String,
+        max: Double,
+        value: Double
     ) {
         val realAngle = (-max).coerceAtLeast(
-            max.toDouble().coerceAtMost(
-                value * step
-            ).toInt()
-        ).toShort()
-        val realCooldown = 0.coerceAtLeast(
-            Byte.MAX_VALUE.toDouble().coerceAtMost(
-                cooldown * IVRCConstants.TICKS_PER_SECOND
-            ).toInt()
-        ).toByte()
-        setValue(realAngle)
-        setCooldown(realCooldown)
-        InterfacePacket.sendToAllClients(
-            PacketVehicleControlAnalog(
-                vehicle,
-                packet,
-                if (realCooldown != Byte.MAX_VALUE) (realAngle - currentValue).toShort() else currentValue,
-                realCooldown
-            )
+            max.coerceAtMost(value)
         )
+
+        if (variableName == RUDDER_VARIABLE) {
+            vehicle.rudderAngle = value
+        } else if (variableName == AILERON_VARIABLE) {
+            vehicle.aileronAngle = value
+        } else if (variableName == ELEVATOR_VARIABLE) {
+            vehicle.elevatorAngle = value
+        }
+
+        this.setVariable(vehicle, variableName, realAngle)
     }
 
-    private fun setVariable(vehicle: EntityVehicleF_Physics, name: String, value: Boolean) {
-        if (name !in vehicle.variablesOn && value) {
-            vehicle.variablesOn += name
-            InterfacePacket.sendToAllClients(PacketEntityVariableToggle(vehicle, name))
-        } else if (name in vehicle.variablesOn && !value) {
-            vehicle.variablesOn -= name
+    private fun setVariable(vehicle: AEntityD_Definable<*>, name: String, value: Boolean) {
+        if (vehicle.isVariableActive(name) != value) {
+            vehicle.toggleVariable(name)
             InterfacePacket.sendToAllClients(PacketEntityVariableToggle(vehicle, name))
         }
+    }
+
+    private fun setVariable(vehicle: AEntityD_Definable<*>, name: String, value: Double) {
+        vehicle.setVariable(name, value)
+        InterfacePacket.sendToAllClients(PacketEntityVariableSet(vehicle, name, value))
     }
 
     // API methods
@@ -173,7 +126,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
         arrayOf(this.vehicle != null)
 
     private fun getLocation(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { arrayOf(it.position.x, it.position.y, it.position.z, it.world.world.provider.dimension) }
+        this.vehicle?.let { arrayOf(it.position.x, it.position.y, it.position.z, it.world.mcWorld.provider.dimension) }
 
     private fun getVelocity(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let { arrayOf(it.motion.x, it.motion.y, it.motion.z, it.velocity) }
@@ -206,6 +159,36 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
         this.vehicle?.let {
             arrayOf(
                 it.engines.mapValues { (_, engine) ->
+                    val stateName: String
+
+                    if (engine.running) {
+                        if (engine.electricStarterEngaged) {
+                            stateName = "RUNNING_ES_ON"
+                        } else if (engine.handStarterEngaged) {
+                            stateName = "RUNNING_HS_ON"
+                        } else {
+                            stateName = "RUNNING"
+                        }
+                    } else {
+                        if (engine.magnetoOn) {
+                            if (engine.electricStarterEngaged) {
+                                stateName = "MAGNETO_ON_ES_ON"
+                            } else if (engine.handStarterEngaged) {
+                                stateName = "MAGNETO_ON_HS_ON"
+                            } else {
+                                stateName = "MAGNETO_ON_STARTERS_OFF"
+                            }
+                        } else {
+                            if (engine.electricStarterEngaged) {
+                                stateName = "MAGNETO_OFF_ES_ON"
+                            } else if (engine.handStarterEngaged) {
+                                stateName = "MAGNETO_OFF_HS_ON"
+                            } else {
+                                stateName = "ENGINE_OFF"
+                            }
+                        }
+                    }
+
                     hashMapOf(
                         "definition" to SerializationUtil.objectToTree(engine.definition),
                         "hasBrokenStarter" to engine.brokenStarter,
@@ -229,11 +212,11 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
                             engine.position.z
                         ),
                         "state" to hashMapOf(
-                            "name" to engine.state.name,
-                            "electricStarter" to engine.state.esOn,
-                            "handStarter" to engine.state.hsOn,
-                            "magneto" to engine.state.magnetoOn,
-                            "running" to engine.state.running
+                            "name" to stateName,
+                            "electricStarter" to engine.electricStarterEngaged,
+                            "handStarter" to engine.handStarterEngaged,
+                            "magneto" to engine.magnetoOn,
+                            "running" to engine.running
                         )
                     )
                 }
@@ -258,9 +241,11 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
         this.vehicle?.let { vehicle ->
             arrayOf(
                 vehicle.locationRiderMap.entries.map { (_, entity) ->
+                    val mcEntity = entity.minecraftEntity
+
                     hashMapOf(
-                        "uuid" to entity.entity.uniqueID.toString(),
-                        "name" to entity.entity.name,
+                        "uuid" to mcEntity.uniqueID.toString(),
+                        "name" to mcEntity.name,
                         "controller" to (entity is WrapperPlayer && vehicle.controller == entity)
                     )
                 }
@@ -277,39 +262,30 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
         }
 
     private fun getThrottle(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { arrayOf(it.throttle.toDouble() / EntityVehicleF_Physics.MAX_THROTTLE.toDouble()) }
+        this.vehicle?.let { arrayOf(it.throttle.toDouble() / MAX_THROTTLE.toDouble()) }
 
     private fun setThrottle(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
             val throttle = ArgumentHelper.getFiniteDouble(args, 0)
-            it.throttle =
-                (0.0.coerceAtLeast(1.0.coerceAtMost(throttle)) * EntityVehicleF_Physics.MAX_THROTTLE).toInt().toByte()
-            InterfacePacket.sendToAllClients(
-                PacketVehicleControlAnalog(
-                    vehicle,
-                    PacketVehicleControlAnalog.Controls.THROTTLE,
-                    it.throttle.toShort(),
-                    Byte.MAX_VALUE
-                )
-            )
+            val normalizedThrottle =
+                0.0.coerceAtLeast(
+                    1.0.coerceAtMost(throttle)
+                ) * MAX_THROTTLE
+            this.setVariable(it, THROTTLE_VARIABLE, normalizedThrottle)
             null
         }
 
     private fun getBrakeLevel(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { arrayOf(it.brake.toDouble() / EntityVehicleF_Physics.MAX_BRAKE.toDouble()) }
+        this.vehicle?.let { arrayOf(it.brake / MAX_BRAKE) }
 
     private fun setBrakeLevel(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
             val brake = ArgumentHelper.getFiniteDouble(args, 0)
-            it.brake = (0.0.coerceAtLeast(1.0.coerceAtMost(brake)) * EntityVehicleF_Physics.MAX_BRAKE).toInt().toByte()
-            InterfacePacket.sendToAllClients(
-                PacketVehicleControlAnalog(
-                    vehicle,
-                    PacketVehicleControlAnalog.Controls.BRAKE,
-                    it.brake.toShort(),
-                    Byte.MAX_VALUE
-                )
-            )
+            val normalizedBrake =
+                0.0.coerceAtLeast(
+                    1.0.coerceAtMost(brake)
+                ) * MAX_BRAKE
+            this.setVariable(it, BRAKE_VARIABLE, normalizedBrake)
             null
         }
 
@@ -319,7 +295,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
     private fun setParkingBrakeActive(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
             val parkingBrake = ArgumentHelper.getBoolean(args, 0)
-            this.setVariable(it, EntityVehicleF_Physics.PARKINGBRAKE_VARIABLE, parkingBrake)
+            this.setVariable(it, PARKINGBRAKE_VARIABLE, parkingBrake)
             null
         }
 
@@ -329,13 +305,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
             val value = ArgumentHelper.getBoolean(args, 1)
 
             it.engines[id.toByte()]?.let {
-                it.setMagnetoStatus(value)
-                InterfacePacket.sendToAllClients(
-                    PacketPartEngine(
-                        it,
-                        if (value) PacketPartEngine.Signal.MAGNETO_ON else PacketPartEngine.Signal.MAGNETO_OFF
-                    )
-                )
+                this.setVariable(it, PartEngine.MAGNETO_VARIABLE, value)
             }
 
             null
@@ -347,13 +317,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
             val value = ArgumentHelper.getBoolean(args, 1)
 
             it.engines[id.toByte()]?.let {
-                it.setElectricStarterStatus(value)
-                InterfacePacket.sendToAllClients(
-                    PacketPartEngine(
-                        it,
-                        if (value) PacketPartEngine.Signal.ES_ON else PacketPartEngine.Signal.ES_OFF
-                    )
-                )
+                this.setVariable(it, PartEngine.ELECTRIC_STARTER_VARIABLE, value)
             }
 
             null
@@ -362,9 +326,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
     private fun shiftUp(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
             for (engine in it.engines.values) {
-                if (engine.shiftUp(false)) {
-                    InterfacePacket.sendToAllClients(PacketPartEngine(engine, PacketPartEngine.Signal.SHIFT_UP_MANUAL))
-                }
+                this.setVariable(engine, PartEngine.UP_SHIFT_VARIABLE, true)
             }
             null
         }
@@ -372,9 +334,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
     private fun shiftDown(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
             for (engine in it.engines.values) {
-                if (engine.shiftDown(false)) {
-                    InterfacePacket.sendToAllClients(PacketPartEngine(engine, PacketPartEngine.Signal.SHIFT_DN_MANUAL))
-                }
+                this.setVariable(engine, PartEngine.DOWN_SHIFT_VARIABLE, true)
             }
             null
         }
@@ -384,7 +344,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
         this.vehicle?.let { vehicle ->
             arrayOf(
                 hashMapOf(*VehicleLight.values().map {
-                    it.legacyName.toLowerCase() to (it.variable in vehicle.variablesOn)
+                    it.legacyName.toLowerCase() to vehicle.isVariableActive(it.variable)
                 }.toTypedArray())
             )
         }
@@ -393,7 +353,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
         this.vehicle?.let { vehicle ->
             arrayOf(
                 hashMapOf(*VehicleLight.values().map {
-                    it.name.toLowerCase() to (it.variable in vehicle.variablesOn)
+                    it.name.toLowerCase() to vehicle.isVariableActive(it.variable)
                 }.toTypedArray())
             )
         }
@@ -422,7 +382,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
                             continue
                         }
 
-                        states[box.variableName] = box.variableName in vehicle.variablesOn
+                        states[box.variableName] = vehicle.isVariableActive(box.variableName)
                     }
                 }
 
@@ -450,15 +410,15 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
 
     @Deprecated("Use getAutopilotState instead")
     private fun getCruiseState(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { arrayOf(it.autopilot, it.speedSetting) }
+        this.vehicle?.let { arrayOf(it.autopilotSetting != 0.0, it.autopilotSetting) }
 
     private fun isHornActive(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { arrayOf(EntityVehicleF_Physics.HORN_VARIABLE in it.variablesOn) }
+        this.vehicle?.let { arrayOf(it.isVariableActive(HORN_VARIABLE)) }
 
     private fun setHornActive(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
             val value = ArgumentHelper.getBoolean(args, 0)
-            this.setVariable(it, EntityVehicleF_Physics.HORN_VARIABLE, value)
+            this.setVariable(it, HORN_VARIABLE, value)
             null
         }
 
@@ -469,14 +429,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
         this.vehicle?.let { it ->
             val state = ArgumentHelper.getBoolean(args, 0)
             if (it.definition.motorized?.isBlimp != true) {
-                it.reverseThrust = state
-                InterfacePacket.sendToAllClients(
-                    PacketVehicleControlDigital(
-                        it,
-                        PacketVehicleControlDigital.Controls.REVERSE,
-                        state
-                    )
-                )
+                this.setVariable(it, REVERSE_THRUST_VARIABLE, state)
             }
             null
         }
@@ -485,29 +438,27 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
         this.vehicle?.let {
             val value = ArgumentHelper.getBoolean(args, 0)
 
-            it.autopilot = value
-            if (value) {
-                it.altitudeSetting = it.position.y
-                it.speedSetting = it.velocity
+            if (!it.definition.motorized.hasAutopilot) {
+                return null
             }
 
-            InterfacePacket.sendToAllClients(
-                PacketVehicleControlDigital(
-                    it,
-                    PacketVehicleControlDigital.Controls.AUTOPILOT,
-                    value
-                )
-            )
+            if (it.definition.motorized.isAircraft) {
+                this.setVariable(it, AUTOPILOT_VARIABLE, it.position.y)
+            } else {
+                this.setVariable(it, AUTOPILOT_VARIABLE, it.velocity)
+            }
 
             null
         }
 
     private fun getFlapAngle(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
+            val selected = it.definition.motorized.flapNotches?.indexOf(it.flapDesiredAngle.toFloat()) ?: -1
+
             arrayOf(
-                it.flapDesiredAngle / IVRCConstants.FLAP_STEP,
+                it.flapDesiredAngle,
                 it.flapCurrentAngle.toDouble() / IVRCConstants.FLAP_STEP.toDouble(),
-                it.flapNotchSelected
+                selected
             )
         }
 
@@ -516,44 +467,21 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
 
     private fun setAileronTrim(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
-            val value = ArgumentHelper.getInt(args, 0)
-            this.setTrim(
-                it,
-                PacketVehicleControlDigital.Controls.TRIM_ROLL,
-                it::aileronTrim::set,
-                it::aileronTrim::get,
-                1,
-                (-EntityVehicleF_Physics.MAX_AILERON_TRIM).toShort(),
-                EntityVehicleF_Physics.MAX_AILERON_TRIM,
-                value
-            )
+            val value = ArgumentHelper.getDouble(args, 0)
+            this.setAngle(it, AILERON_TRIM_VARIABLE, MAX_AILERON_TRIM, value)
             null
         }
 
     private fun getAileronAngle(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
-            arrayOf(
-                it.aileronAngle / IVRCConstants.ANGLE_STEP,
-                it.aileronCooldown / IVRCConstants.TICKS_PER_SECOND
-            )
+            arrayOf(it.aileronAngle, 0)
         }
 
     private fun setAileronAngle(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
             val value = ArgumentHelper.getDouble(args, 0)
-            val cooldown = ArgumentHelper.getDouble(args, 1)
 
-            this.setAngle(
-                it,
-                PacketVehicleControlAnalog.Controls.AILERON,
-                it.aileronAngle,
-                it::aileronAngle::set,
-                it::aileronCooldown::set,
-                EntityVehicleF_Physics.MAX_AILERON_ANGLE,
-                IVRCConstants.ANGLE_STEP,
-                value,
-                cooldown
-            )
+            this.setAngle(it, ELEVATOR_VARIABLE, MAX_ELEVATOR_ANGLE, value)
 
             null
         }
@@ -563,44 +491,21 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
 
     private fun setElevatorTrim(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
-            val value = ArgumentHelper.getInt(args, 0)
-            this.setTrim(
-                it,
-                PacketVehicleControlDigital.Controls.TRIM_PITCH,
-                it::elevatorTrim::set,
-                it::elevatorTrim::get,
-                1,
-                (-EntityVehicleF_Physics.MAX_ELEVATOR_TRIM).toShort(),
-                EntityVehicleF_Physics.MAX_ELEVATOR_TRIM,
-                value
-            )
+            val value = ArgumentHelper.getDouble(args, 0)
+            this.setAngle(it, ELEVATOR_TRIM_VARIABLE, MAX_ELEVATOR_TRIM, value)
             null
         }
 
     private fun getElevatorAngle(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
-            arrayOf(
-                it.elevatorAngle / IVRCConstants.ANGLE_STEP,
-                it.elevatorCooldown / IVRCConstants.TICKS_PER_SECOND
-            )
+            arrayOf(it.elevatorAngle, 0)
         }
 
     private fun setElevatorAngle(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
             val value = ArgumentHelper.getDouble(args, 0)
-            val cooldown = ArgumentHelper.getDouble(args, 1)
 
-            this.setAngle(
-                it,
-                PacketVehicleControlAnalog.Controls.ELEVATOR,
-                it.elevatorAngle,
-                it::elevatorAngle::set,
-                it::elevatorCooldown::set,
-                EntityVehicleF_Physics.MAX_ELEVATOR_ANGLE,
-                IVRCConstants.ANGLE_STEP,
-                value,
-                cooldown
-            )
+            this.setAngle(it, ELEVATOR_VARIABLE, MAX_ELEVATOR_ANGLE, value)
 
             null
         }
@@ -610,62 +515,39 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
 
     private fun setRudderTrim(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
-            val value = ArgumentHelper.getInt(args, 0)
-            this.setTrim(
-                it,
-                PacketVehicleControlDigital.Controls.TRIM_YAW,
-                it::rudderTrim::set,
-                it::rudderTrim::get,
-                1,
-                (-EntityVehicleF_Physics.MAX_RUDDER_TRIM).toShort(),
-                EntityVehicleF_Physics.MAX_RUDDER_TRIM,
-                value
-            )
+            val value = ArgumentHelper.getDouble(args, 0)
+            this.setAngle(it, RUDDER_TRIM_VARIABLE, MAX_RUDDER_TRIM, value)
             null
         }
 
     private fun getRudderAngle(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
-            arrayOf(
-                it.rudderAngle / IVRCConstants.ANGLE_STEP,
-                it.rudderCooldown / IVRCConstants.TICKS_PER_SECOND
-            )
+            arrayOf(it.rudderAngle, 0)
         }
 
     private fun setRudderAngle(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
             val value = ArgumentHelper.getDouble(args, 0)
-            val cooldown = ArgumentHelper.getDouble(args, 1)
 
-            this.setAngle(
-                it,
-                PacketVehicleControlAnalog.Controls.RUDDER,
-                it.rudderAngle,
-                it::rudderAngle::set,
-                it::rudderCooldown::set,
-                EntityVehicleF_Physics.MAX_RUDDER_ANGLE,
-                IVRCConstants.ANGLE_STEP,
-                value,
-                cooldown
-            )
+            this.setAngle(it, RUDDER_VARIABLE, MAX_RUDDER_ANGLE, value)
 
             null
         }
 
     private fun getLandingGearState(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { arrayOf(EntityVehicleF_Physics.GEAR_VARIABLE in it.variablesOn, it.gearMovementTime) }
+        this.vehicle?.let { arrayOf(it.isVariableActive(GEAR_VARIABLE), it.gearMovementTime) }
 
     private fun setLandingGearDeployed(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
             val value = ArgumentHelper.getBoolean(args, 0)
-            this.setVariable(it, EntityVehicleF_Physics.GEAR_VARIABLE, value)
+            this.setVariable(it, GEAR_VARIABLE, value)
             null
         }
 
     private fun getCustomVariables(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let { vehicle ->
             vehicle.definition.rendering?.customVariables?.let { variables ->
-                arrayOf(hashMapOf(*variables.map { it to (it in vehicle.variablesOn) }.toTypedArray()))
+                arrayOf(hashMapOf(*variables.map { it to vehicle.isVariableActive(it) }.toTypedArray()))
             }
         }
 
@@ -708,7 +590,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
 
     @Deprecated("Use getAutopilotState instead")
     private fun isAutopilotActive(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { arrayOf(it.autopilot) }
+        this.vehicle?.let { arrayOf(it.isVariableActive(AUTOPILOT_VARIABLE)) }
 
     @Deprecated("Removed")
     private fun getTrailer(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? = null
@@ -784,7 +666,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
             val name = ArgumentHelper.getString(args, 0)
 
             it.selectedBeaconName = name
-            it.selectedBeacon = NavBeaconSystem.getBeacon(it.world, name)
+            it.selectedBeacon = NavBeacon.getByNameFromWorld(it.world, name)
 
             InterfacePacket.sendToAllClients(PacketVehicleBeaconChange(it, name))
 
@@ -818,25 +700,25 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
         this.vehicle?.let {
             arrayOf(
                 hashMapOf(
-                    "aileronAngleBounds" to EntityVehicleF_Physics.MAX_AILERON_ANGLE / IVRCConstants.ANGLE_STEP,
-                    "aileronTrimBounds" to EntityVehicleF_Physics.MAX_AILERON_TRIM,
-                    "elevatorAngleBounds" to EntityVehicleF_Physics.MAX_ELEVATOR_ANGLE / IVRCConstants.ANGLE_STEP,
-                    "elevatorTrimBounds" to EntityVehicleF_Physics.MAX_ELEVATOR_TRIM,
-                    "rudderAngleBounds" to EntityVehicleF_Physics.MAX_RUDDER_ANGLE / IVRCConstants.ANGLE_STEP,
-                    "rudderTrimBounds" to EntityVehicleF_Physics.MAX_RUDDER_TRIM
+                    "aileronAngleBounds" to MAX_AILERON_ANGLE,
+                    "aileronTrimBounds" to MAX_AILERON_TRIM,
+                    "elevatorAngleBounds" to MAX_ELEVATOR_ANGLE,
+                    "elevatorTrimBounds" to MAX_ELEVATOR_TRIM,
+                    "rudderAngleBounds" to MAX_RUDDER_ANGLE,
+                    "rudderTrimBounds" to MAX_RUDDER_TRIM
                 )
             )
         }
 
     private fun getAutopilotState(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { arrayOf(it.autopilot, it.altitudeSetting, it.speedSetting) }
+        this.vehicle?.let { arrayOf(it.autopilotSetting != 0.0, it.autopilotSetting, it.autopilotSetting) }
 
     private fun shiftNeutral(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
             for (engine in it.engines.values) {
-                engine.currentGear = 0
+                this.setVariable(engine, PartEngine.NEUTRAL_SHIFT_VARIABLE, true)
             }
-            InterfacePacket.sendToAllClients(PacketVehicleControlDigital(it, PacketVehicleControlDigital.Controls.SHIFT_NEUTRAL, true))
+
             null
         }
 
@@ -851,13 +733,10 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
         }
 
     private fun setFlapNotchInternal(vehicle: EntityVehicleF_Physics, notch: Int) {
-        while (vehicle.flapNotchSelected < notch && vehicle.flapNotchSelected < vehicle.definition.motorized.flapNotches.size) {
-            vehicle.flapNotchSelected++
-            InterfacePacket.sendToAllClients(PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.FLAPS, true))
-        }
-        while (vehicle.flapNotchSelected > notch && vehicle.flapNotchSelected > 0) {
-            vehicle.flapNotchSelected--
-            InterfacePacket.sendToAllClients(PacketVehicleControlDigital(vehicle, PacketVehicleControlDigital.Controls.FLAPS, false))
+        val target = vehicle.definition.motorized.flapNotches[notch]
+
+        if (notch < vehicle.definition.motorized.flapNotches.size && notch > 0) {
+            this.setVariable(vehicle, FLAPS_VARIABLE, target.toDouble())
         }
     }
 
@@ -900,6 +779,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
         this.methods["getAutopilotState"] = this::getAutopilotState
         this.methods["setFlapNotch"] = this::setFlapNotch
         this.methods["getLights"] = this::getLights
+        this.methods["getLights2"] = this::getLights2
         this.methods["setLightActive"] = this::setLightActive
 
         this.methods["getAileronTrim"] = this::getAileronTrim

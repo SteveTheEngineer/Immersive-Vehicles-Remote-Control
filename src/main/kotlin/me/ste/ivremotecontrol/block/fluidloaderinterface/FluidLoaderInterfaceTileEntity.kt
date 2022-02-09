@@ -6,6 +6,7 @@ import dan200.computercraft.api.lua.LuaException
 import dan200.computercraft.api.peripheral.IComputerAccess
 import me.ste.ivremotecontrol.block.peripheral.PeripheralTileEntity
 import me.ste.ivremotecontrol.util.MTSUtil
+import me.ste.ivremotecontrol.util.mtsTileEntity
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityFluidLoader
 import minecrafttransportsimulator.mcinterface.BuilderTileEntity
 import net.minecraft.block.BlockDirectional
@@ -19,7 +20,7 @@ class FluidLoaderInterfaceTileEntity : PeripheralTileEntity("fluidloader") {
             if (tileEntity !is BuilderTileEntity<*>) {
                 return null
             }
-            return tileEntity.tileEntity as? TileEntityFluidLoader
+            return tileEntity.mtsTileEntity as? TileEntityFluidLoader
         }
 
     private fun isAvailable(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any> =
