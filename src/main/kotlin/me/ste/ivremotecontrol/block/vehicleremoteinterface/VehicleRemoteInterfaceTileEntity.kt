@@ -132,7 +132,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
         this.vehicle?.let { arrayOf(it.motion.x, it.motion.y, it.motion.z, it.velocity) }
 
     private fun getRotation(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { arrayOf(it.angles.x, it.angles.y, it.angles.z) }
+        this.vehicle?.let { arrayOf(it.orientation.angles.x, it.orientation.angles.y, it.orientation.angles.z) }
 
     private fun getUniqueIds(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let { arrayOf(MTSUtil.getEntity(it)?.uniqueID?.toString() ?: "unknown", it.uniqueUUID) }
@@ -680,12 +680,13 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
                     *(vehicle.parts.filterIsInstance<PartGun>().mapIndexed { i, it ->
                         i to hashMapOf(
                             "definition" to SerializationUtil.objectToTree(it.definition),
-                            "bulletsLeft" to it.bulletsLeft,
-                            "firing" to it.ticksFiring,
+                            "bulletsLeft" to it.getRawVariableValue("gun_ammo_count", 0.0F),
+                            "firing" to 0,
+                            "firedLastCheck" to it.firedThisCheck,
                             "rotation" to arrayOf(
-                                it.rotation.x,
-                                it.rotation.y,
-                                it.rotation.z
+                                it.orientation.angles.x,
+                                it.orientation.angles.y,
+                                it.orientation.angles.z
                             ),
                             "position" to arrayOf(it.position.x, it.position.y, it.position.z)
                         )

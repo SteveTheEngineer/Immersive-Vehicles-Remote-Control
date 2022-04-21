@@ -102,7 +102,7 @@ class FuelPumpInterfaceTileEntity : PeripheralTileEntity("fuelpump") {
                     if (it.tank.fluidLevel > 0) {
                         if (vehicle.fuelTank.fluid.isEmpty() || vehicle.fuelTank.fluid == it.tank.fluid) {
                             for (part in vehicle.parts) {
-                                if (part is PartEngine && it.tank.fluid in ConfigSystem.configObject.fuel.fuels[part.definition.engine.fuelType]!!) {
+                                if (part is PartEngine && it.tank.fluid in ConfigSystem.settings.fuel.fuels[part.definition.engine.fuelType]!!) {
                                     it.connectedVehicle = vehicle
                                     vehicle.beingFueled = true
                                     it.tank.resetAmountDispensed()
