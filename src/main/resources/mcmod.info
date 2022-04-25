@@ -3,7 +3,7 @@
         "modid": "ivremotecontrol",
         "name": "Immersive Vehicles Remote Control",
         "description": "This mod lets you control MTS's vehicles and interact with it's blocks using ComputerCraft",
-        "version": "2.5",
+        "version": "2.6",
         "mcversion": "1.12.2",
         "authorList": [
             "SteveTheEngineer"
