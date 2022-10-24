@@ -2,18 +2,16 @@ package me.ste.ivremotecontrol.block.fuelpumpinterface
 
 import dan200.computercraft.api.lua.ILuaContext
 import dan200.computercraft.api.peripheral.IComputerAccess
+import mcinterface1122.BuilderEntityExisting
+import mcinterface1122.BuilderTileEntity
 import me.ste.ivremotecontrol.block.peripheral.PeripheralTileEntity
 import me.ste.ivremotecontrol.util.MTSUtil
 import me.ste.ivremotecontrol.util.mtsEntity
 import me.ste.ivremotecontrol.util.mtsTileEntity
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityFuelPump
-import minecrafttransportsimulator.entities.components.AEntityA_Base
-import minecrafttransportsimulator.entities.components.AEntityB_Existing
 import minecrafttransportsimulator.entities.instances.EntityVehicleF_Physics
 import minecrafttransportsimulator.entities.instances.PartEngine
-import minecrafttransportsimulator.mcinterface.BuilderEntityExisting
-import minecrafttransportsimulator.mcinterface.BuilderTileEntity
-import minecrafttransportsimulator.mcinterface.InterfacePacket
+import minecrafttransportsimulator.mcinterface.InterfaceManager
 import minecrafttransportsimulator.packets.instances.PacketTileEntityFuelPumpConnection
 import minecrafttransportsimulator.systems.ConfigSystem
 import net.minecraft.block.BlockDirectional
@@ -79,7 +77,7 @@ class FuelPumpInterfaceTileEntity : PeripheralTileEntity("fuelpump") {
             if (it.connectedVehicle != null) {
                 it.connectedVehicle.beingFueled = false
                 it.connectedVehicle = null
-                InterfacePacket.sendToAllClients(PacketTileEntityFuelPumpConnection(it, false))
+                InterfaceManager.packetInterface.sendToAllClients(PacketTileEntityFuelPumpConnection(it, null))
             }
             null
         }
@@ -106,7 +104,9 @@ class FuelPumpInterfaceTileEntity : PeripheralTileEntity("fuelpump") {
                                     it.connectedVehicle = vehicle
                                     vehicle.beingFueled = true
                                     it.tank.resetAmountDispensed()
-                                    InterfacePacket.sendToAllClients(PacketTileEntityFuelPumpConnection(it, true))
+                                    InterfaceManager.packetInterface.sendToAllClients(PacketTileEntityFuelPumpConnection(it, vehicle))
+
+                                    return arrayOf(true)
                                 }
                             }
                             arrayOf(false, "The fuel is not accepted by any of the vehicle's engines")

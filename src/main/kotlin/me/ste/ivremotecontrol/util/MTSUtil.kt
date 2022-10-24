@@ -1,19 +1,19 @@
 package me.ste.ivremotecontrol.util
 
+import mcinterface1122.BuilderEntityExisting
+import mcinterface1122.BuilderTileEntity
+import mcinterface1122.WrapperEntity
+import mcinterface1122.WrapperWorld
 import minecrafttransportsimulator.blocks.tileentities.components.ATileEntityBase
 import minecrafttransportsimulator.entities.components.AEntityA_Base
 import minecrafttransportsimulator.entities.components.AEntityB_Existing
-import minecrafttransportsimulator.mcinterface.BuilderEntityExisting
-import minecrafttransportsimulator.mcinterface.BuilderTileEntity
-import minecrafttransportsimulator.mcinterface.WrapperEntity
-import minecrafttransportsimulator.mcinterface.WrapperWorld
 import net.minecraft.entity.Entity
 import net.minecraft.world.World
 
 object MTSUtil {
-    // Gets the minecraft entity by it's MTS variant
+    // Gets the minecraft entity by its MTS variant
     fun getEntity(base: AEntityA_Base): Entity? {
-        for (entity in base.world.mcWorld.loadedEntityList) {
+        for (entity in (base.world as WrapperWorld).mcWorld.loadedEntityList) {
             if (entity is BuilderEntityExisting) {
                 val mtsEntity = entity.mtsEntity
                 if (mtsEntity != null && mtsEntity.uniqueUUID == base.uniqueUUID) {

@@ -19,7 +19,7 @@ apply plugin: "net.minecraftforge.gradle.forge"
 apply plugin: "kotlin"
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
-version = "2.6"
+version = "2.7"
 group = "me.ste" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "ivremotecontrol"
 
@@ -79,7 +79,8 @@ dependencies {
     implementation "org.squiddev:cc-tweaked-1.12.2:1.89.2"
     implementation "net.shadowfacts:Forgelin:1.8.4"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.3.40"
-    implementation "curse.maven:minecraft-transport-simulator-286703:3762171"
+
+    deobfCompile "curse.maven:minecraft-transport-simulator-286703:4035086"
 }
 
 processResources {
@@ -99,6 +100,16 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude "mcmod.info"
     }
+}
+
+sourceSets {
+    main {
+        output.resourcesDir = "build/classes/kotlin/main"
+    }
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 // Fix the extractRangemapReplacedMain task

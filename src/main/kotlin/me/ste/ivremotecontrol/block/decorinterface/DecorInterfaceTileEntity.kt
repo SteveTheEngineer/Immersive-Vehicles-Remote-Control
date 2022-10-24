@@ -3,6 +3,7 @@ package me.ste.ivremotecontrol.block.decorinterface
 import dan200.computercraft.api.lua.ArgumentHelper
 import dan200.computercraft.api.lua.ILuaContext
 import dan200.computercraft.api.peripheral.IComputerAccess
+import mcinterface1122.BuilderTileEntity
 import me.ste.ivremotecontrol.block.decorinterface.decor.Decor
 import me.ste.ivremotecontrol.block.decorinterface.decor.TileEntityDecorWrapper
 import me.ste.ivremotecontrol.block.decorinterface.decor.TileEntityPoleWrapper
@@ -11,9 +12,9 @@ import me.ste.ivremotecontrol.util.mtsTileEntity
 import minecrafttransportsimulator.blocks.components.ABlockBase
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityDecor
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityPole
-import minecrafttransportsimulator.mcinterface.BuilderTileEntity
-import minecrafttransportsimulator.mcinterface.InterfacePacket
+import minecrafttransportsimulator.mcinterface.InterfaceManager
 import net.minecraft.block.BlockDirectional
+import kotlin.math.min
 
 
 class DecorInterfaceTileEntity : PeripheralTileEntity("decor") {
@@ -24,8 +25,8 @@ class DecorInterfaceTileEntity : PeripheralTileEntity("decor") {
             if (tileEntity !is BuilderTileEntity<*>) {
                 return null
             }
-            val base = tileEntity.mtsTileEntity
-            return when (base) {
+
+            return when (val base = tileEntity.mtsTileEntity) {
                 is TileEntityDecor -> TileEntityDecorWrapper(base)
                 is TileEntityPole -> TileEntityPoleWrapper(base)
                 else -> null
@@ -62,16 +63,20 @@ class DecorInterfaceTileEntity : PeripheralTileEntity("decor") {
                 throw ArgumentHelper.badArgument(0, "an axis", axisString)
             }
 
-            // Generate the text lines array and apply it
+            // Generate the text lines map and apply it
             decor.getTextLines(axis)?.let {
-                val lines = ArrayList(it.values)
-                for ((i, key) in it.keys.withIndex()) {
-                    if (key.fieldName == name) {
-                        lines[i] = text.substring(0, key.maxLength.coerceAtMost(text.length))
+                val lines = LinkedHashMap<String, String>()
+
+                for ((key, value) in it) {
+                    lines[key.fieldName] = if (key.fieldName == name) {
+                        text.substring(0, min(key.maxLength, text.length))
+                    } else {
+                        value
                     }
                 }
+
                 decor.setTextLines(axis, lines)
-                InterfacePacket.sendToAllClients(decor.getUpdatePacket(axis, lines))
+                InterfaceManager.packetInterface.sendToAllClients(decor.getUpdatePacket(axis, lines))
             }
 
             null

@@ -4,11 +4,11 @@ import dan200.computercraft.api.lua.ArgumentHelper
 import dan200.computercraft.api.lua.ILuaContext
 import dan200.computercraft.api.lua.LuaException
 import dan200.computercraft.api.peripheral.IComputerAccess
+import mcinterface1122.BuilderTileEntity
 import me.ste.ivremotecontrol.block.peripheral.PeripheralTileEntity
 import me.ste.ivremotecontrol.util.MTSUtil
 import me.ste.ivremotecontrol.util.mtsTileEntity
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityFluidLoader
-import minecrafttransportsimulator.mcinterface.BuilderTileEntity
 import net.minecraft.block.BlockDirectional
 
 

@@ -2,15 +2,13 @@ package me.ste.ivremotecontrol.block.signalcontrollerinterface
 
 import dan200.computercraft.api.lua.ArgumentHelper
 import dan200.computercraft.api.lua.ILuaContext
-import dan200.computercraft.api.lua.LuaException
 import dan200.computercraft.api.peripheral.IComputerAccess
+import mcinterface1122.BuilderTileEntity
 import me.ste.ivremotecontrol.block.peripheral.PeripheralTileEntity
-import me.ste.ivremotecontrol.constants.IVRCConstants
 import me.ste.ivremotecontrol.util.mtsTileEntity
 import minecrafttransportsimulator.blocks.components.ABlockBase
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntitySignalController
-import minecrafttransportsimulator.mcinterface.BuilderTileEntity
-import minecrafttransportsimulator.mcinterface.InterfacePacket
+import minecrafttransportsimulator.mcinterface.InterfaceManager
 import minecrafttransportsimulator.packets.instances.PacketTileEntitySignalControllerChange
 import net.minecraft.block.BlockDirectional
 
@@ -44,7 +42,7 @@ class SignalControllerInterfaceTileEntity : PeripheralTileEntity("signalcontroll
             }
 
             it.initializeController(null)
-            InterfacePacket.sendToAllClients(PacketTileEntitySignalControllerChange(it))
+            InterfaceManager.packetInterface.sendToAllClients(PacketTileEntitySignalControllerChange(it))
 
             null
         }
@@ -63,7 +61,7 @@ class SignalControllerInterfaceTileEntity : PeripheralTileEntity("signalcontroll
             }
 
             it.initializeController(null)
-            InterfacePacket.sendToAllClients(PacketTileEntitySignalControllerChange(it))
+            InterfaceManager.packetInterface.sendToAllClients(PacketTileEntitySignalControllerChange(it))
 
             null
         }
@@ -87,7 +85,7 @@ class SignalControllerInterfaceTileEntity : PeripheralTileEntity("signalcontroll
         this.controller?.let {
             it.greenMainTime = ArgumentHelper.getInt(args, 0)
             it.initializeController(null)
-            InterfacePacket.sendToAllClients(PacketTileEntitySignalControllerChange(it))
+            InterfaceManager.packetInterface.sendToAllClients(PacketTileEntitySignalControllerChange(it))
             null
         }
 
@@ -95,7 +93,7 @@ class SignalControllerInterfaceTileEntity : PeripheralTileEntity("signalcontroll
         this.controller?.let {
             it.greenCrossTime = ArgumentHelper.getInt(args, 0)
             it.initializeController(null)
-            InterfacePacket.sendToAllClients(PacketTileEntitySignalControllerChange(it))
+            InterfaceManager.packetInterface.sendToAllClients(PacketTileEntitySignalControllerChange(it))
             null
         }
 
@@ -103,7 +101,7 @@ class SignalControllerInterfaceTileEntity : PeripheralTileEntity("signalcontroll
         this.controller?.let {
             it.yellowMainTime = ArgumentHelper.getInt(args, 0)
             it.initializeController(null)
-            InterfacePacket.sendToAllClients(PacketTileEntitySignalControllerChange(it))
+            InterfaceManager.packetInterface.sendToAllClients(PacketTileEntitySignalControllerChange(it))
             null
         }
 
@@ -111,7 +109,7 @@ class SignalControllerInterfaceTileEntity : PeripheralTileEntity("signalcontroll
         this.controller?.let {
             it.yellowCrossTime = ArgumentHelper.getInt(args, 0)
             it.initializeController(null)
-            InterfacePacket.sendToAllClients(PacketTileEntitySignalControllerChange(it))
+            InterfaceManager.packetInterface.sendToAllClients(PacketTileEntitySignalControllerChange(it))
             null
         }
 
@@ -119,7 +117,7 @@ class SignalControllerInterfaceTileEntity : PeripheralTileEntity("signalcontroll
         this.controller?.let {
             it.allRedTime = ArgumentHelper.getInt(args, 0)
             it.initializeController(null)
-            InterfacePacket.sendToAllClients(PacketTileEntitySignalControllerChange(it))
+            InterfaceManager.packetInterface.sendToAllClients(PacketTileEntitySignalControllerChange(it))
             null
         }
 
@@ -167,7 +165,7 @@ class SignalControllerInterfaceTileEntity : PeripheralTileEntity("signalcontroll
             }
 
             it.initializeController(null)
-            InterfacePacket.sendToAllClients(PacketTileEntitySignalControllerChange(it))
+            InterfaceManager.packetInterface.sendToAllClients(PacketTileEntitySignalControllerChange(it))
 
             null
         }

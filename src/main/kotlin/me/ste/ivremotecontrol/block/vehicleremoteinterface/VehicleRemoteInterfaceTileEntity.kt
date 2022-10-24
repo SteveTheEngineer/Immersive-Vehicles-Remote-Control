@@ -3,6 +3,9 @@ package me.ste.ivremotecontrol.block.vehicleremoteinterface
 import dan200.computercraft.api.lua.ArgumentHelper
 import dan200.computercraft.api.lua.ILuaContext
 import dan200.computercraft.api.peripheral.IComputerAccess
+import mcinterface1122.BuilderEntityExisting
+import mcinterface1122.WrapperEntity
+import mcinterface1122.WrapperWorld
 import me.ste.ivremotecontrol.block.peripheral.PeripheralTileEntity
 import me.ste.ivremotecontrol.constants.IVRCConfiguration
 import me.ste.ivremotecontrol.constants.IVRCConstants
@@ -16,12 +19,12 @@ import minecrafttransportsimulator.entities.instances.EntityVehicleF_Physics.*
 import minecrafttransportsimulator.entities.instances.PartEngine
 import minecrafttransportsimulator.entities.instances.PartGroundDevice
 import minecrafttransportsimulator.entities.instances.PartGun
-import minecrafttransportsimulator.mcinterface.BuilderEntityExisting
-import minecrafttransportsimulator.mcinterface.InterfacePacket
-import minecrafttransportsimulator.mcinterface.WrapperPlayer
+import minecrafttransportsimulator.mcinterface.InterfaceManager
 import minecrafttransportsimulator.packets.instances.*
+import net.minecraft.entity.Entity
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.EnumFacing
+import net.minecraft.world.World
 import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.items.CapabilityItemHandler
 import net.minecraftforge.items.ItemStackHandler
@@ -112,13 +115,13 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
     private fun setVariable(vehicle: AEntityD_Definable<*>, name: String, value: Boolean) {
         if (vehicle.isVariableActive(name) != value) {
             vehicle.toggleVariable(name)
-            InterfacePacket.sendToAllClients(PacketEntityVariableToggle(vehicle, name))
+            InterfaceManager.packetInterface.sendToAllClients(PacketEntityVariableToggle(vehicle, name))
         }
     }
 
     private fun setVariable(vehicle: AEntityD_Definable<*>, name: String, value: Double) {
         vehicle.setVariable(name, value)
-        InterfacePacket.sendToAllClients(PacketEntityVariableSet(vehicle, name, value))
+        InterfaceManager.packetInterface.sendToAllClients(PacketEntityVariableSet(vehicle, name, value))
     }
 
     // API methods
@@ -126,7 +129,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
         arrayOf(this.vehicle != null)
 
     private fun getLocation(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
-        this.vehicle?.let { arrayOf(it.position.x, it.position.y, it.position.z, it.world.mcWorld.provider.dimension) }
+        this.vehicle?.let { arrayOf(it.position.x, it.position.y, it.position.z, (it.world as WrapperWorld).mcWorld.provider.dimension) }
 
     private fun getVelocity(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let { arrayOf(it.motion.x, it.motion.y, it.motion.z, it.velocity) }
@@ -158,7 +161,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
     private fun getEngines(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
             arrayOf(
-                it.engines.mapValues { (_, engine) ->
+                it.engines.map { engine ->
                     val stateName: String
 
                     if (engine.running) {
@@ -191,7 +194,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
 
                     hashMapOf(
                         "definition" to SerializationUtil.objectToTree(engine.definition),
-                        "hasBrokenStarter" to engine.brokenStarter,
+                        "hasBrokenStarter" to false, // Probably completely removed from the mod
                         "currentGear" to engine.currentGear,
                         "fuelFlow" to engine.fuelFlow,
                         "hasFuelLeak" to engine.fuelLeak,
@@ -199,7 +202,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
                         "isBadShift" to engine.badShift,
                         "downshiftCountdown" to engine.downshiftCountdown,
                         "hours" to engine.hours,
-                        "isCreative" to engine.isCreative,
+                        "isCreative" to it.isCreative,
                         "hasLinkedEngine" to (engine.linkedEngine != null),
                         "hasOilLeak" to engine.oilLeak,
                         "pressure" to engine.pressure,
@@ -240,13 +243,13 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
     private fun getPassengers(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let { vehicle ->
             arrayOf(
-                vehicle.locationRiderMap.entries.map { (_, entity) ->
-                    val mcEntity = entity.minecraftEntity
+                vehicle.parts.filter { it.rider != null }.map { part ->
+                    val mcEntity = (part.rider as WrapperEntity).minecraftEntity
 
                     hashMapOf(
                         "uuid" to mcEntity.uniqueID.toString(),
                         "name" to mcEntity.name,
-                        "controller" to (entity is WrapperPlayer && vehicle.controller == entity)
+                        "controller" to part.placementDefinition.isController
                     )
                 }
             )
@@ -304,7 +307,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
             val id = ArgumentHelper.getInt(args, 0)
             val value = ArgumentHelper.getBoolean(args, 1)
 
-            it.engines[id.toByte()]?.let {
+            it.engines[id]?.let {
                 this.setVariable(it, PartEngine.MAGNETO_VARIABLE, value)
             }
 
@@ -316,7 +319,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
             val id = ArgumentHelper.getInt(args, 0)
             val value = ArgumentHelper.getBoolean(args, 1)
 
-            it.engines[id.toByte()]?.let {
+            it.engines[id]?.let {
                 this.setVariable(it, PartEngine.ELECTRIC_STARTER_VARIABLE, value)
             }
 
@@ -325,7 +328,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
 
     private fun shiftUp(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
-            for (engine in it.engines.values) {
+            for (engine in it.engines) {
                 this.setVariable(engine, PartEngine.UP_SHIFT_VARIABLE, true)
             }
             null
@@ -333,7 +336,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
 
     private fun shiftDown(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
-            for (engine in it.engines.values) {
+            for (engine in it.engines) {
                 this.setVariable(engine, PartEngine.DOWN_SHIFT_VARIABLE, true)
             }
             null
@@ -628,11 +631,11 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
             val name = ArgumentHelper.getString(args, 0)
             val value = ArgumentHelper.getString(args, 1)
 
-            val lines: MutableList<String> = ArrayList()
+            val lines = LinkedHashMap<String, String>()
 
             vehicle.definition.rendering?.textObjects?.let {
                 for (text in it) {
-                    lines += if (text.fieldName == name) {
+                    lines[text.fieldName] = if (text.fieldName == name) {
                         value.substring(0, value.length.coerceAtMost(text.maxLength))
                     } else {
                         vehicle.text[text]!!
@@ -643,7 +646,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
             for (part in vehicle.parts) {
                 part.definition.rendering?.textObjects?.let {
                     for (text in it) {
-                        lines += if (text.fieldName == name) {
+                        lines[text.fieldName] = if (text.fieldName == name) {
                             value.substring(0, value.length.coerceAtMost(text.maxLength))
                         } else {
                             part.text[text]!!
@@ -653,7 +656,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
             }
 
             vehicle.updateText(lines)
-            InterfacePacket.sendToAllClients(PacketEntityTextChange(vehicle, lines))
+            InterfaceManager.packetInterface.sendToAllClients(PacketEntityTextChange(vehicle, lines))
 
             null
         }
@@ -668,7 +671,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
             it.selectedBeaconName = name
             it.selectedBeacon = NavBeacon.getByNameFromWorld(it.world, name)
 
-            InterfacePacket.sendToAllClients(PacketVehicleBeaconChange(it, name))
+            InterfaceManager.packetInterface.sendToAllClients(PacketVehicleBeaconChange(it, name))
 
             null
         }
@@ -716,7 +719,7 @@ class VehicleRemoteInterfaceTileEntity : PeripheralTileEntity("vehicle") {
 
     private fun shiftNeutral(pc: IComputerAccess, ctx: ILuaContext, args: Array<Any>): Array<Any>? =
         this.vehicle?.let {
-            for (engine in it.engines.values) {
+            for (engine in it.engines) {
                 this.setVariable(engine, PartEngine.NEUTRAL_SHIFT_VARIABLE, true)
             }
 

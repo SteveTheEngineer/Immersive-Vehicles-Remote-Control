@@ -1,11 +1,11 @@
 package me.ste.ivremotecontrol.listener
 
+import mcinterface1122.BuilderEntityExisting
 import me.ste.ivremotecontrol.item.VehicleSelectorItem
 import me.ste.ivremotecontrol.util.mtsEntity
 import minecrafttransportsimulator.entities.components.AEntityA_Base
 import minecrafttransportsimulator.entities.components.AEntityB_Existing
 import minecrafttransportsimulator.entities.instances.EntityVehicleF_Physics
-import minecrafttransportsimulator.mcinterface.BuilderEntityExisting
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.EnumActionResult
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
