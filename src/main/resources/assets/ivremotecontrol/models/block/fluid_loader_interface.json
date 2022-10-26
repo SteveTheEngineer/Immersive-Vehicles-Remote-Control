@@ -1,8 +1,0 @@
-{
-    "parent": "minecraft:block/piston",
-    "textures": {
-        "platform": "ivremotecontrol:blocks/fluid_loader_interface/front",
-        "side": "ivremotecontrol:blocks/fluid_loader_interface/side",
-        "bottom": "ivremotecontrol:blocks/fluid_loader_interface/back"
-    }
-}

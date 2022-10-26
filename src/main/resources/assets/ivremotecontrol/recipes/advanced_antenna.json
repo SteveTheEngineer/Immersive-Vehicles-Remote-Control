@@ -1,0 +1,24 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " A ",
+        " A ",
+        "BCB"
+    ],
+    "key": {
+        "A": {
+            "type": "forge:ore_dict",
+            "ore": "blockGold"
+        },
+        "B": {
+            "type": "forge:ore_dict",
+            "ore": "enderpearl"
+        },
+        "C": {
+            "item": "ivremotecontrol:basic_antenna"
+        }
+    },
+    "result": {
+        "item": "ivremotecontrol:advanced_antenna"
+    }
+}

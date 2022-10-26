@@ -1,0 +1,24 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " A ",
+        " A ",
+        "BCB"
+    ],
+    "key": {
+        "A": {
+            "type": "forge:ore_dict",
+            "ore": "netherStar"
+        },
+        "B": {
+            "type": "forge:ore_dict",
+            "ore": "blockEmerald"
+        },
+        "C": {
+            "item": "ivremotecontrol:elite_antenna"
+        }
+    },
+    "result": {
+        "item": "ivremotecontrol:ultimate_antenna"
+    }
+}

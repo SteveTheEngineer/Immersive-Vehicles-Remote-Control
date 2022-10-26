@@ -1,8 +1,6 @@
 {
-    "parent": "minecraft:block/cube_bottom_top",
+    "parent": "ivremotecontrol:block/block_interface",
     "textures": {
-        "top": "ivremotecontrol:blocks/fluid_loader_interface/front",
-        "side": "ivremotecontrol:blocks/fluid_loader_interface/side",
-        "bottom": "ivremotecontrol:blocks/fluid_loader_interface/back"
+        "0": "ivremotecontrol:blocks/fluid_loader_interface"
     }
 }

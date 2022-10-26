@@ -1,0 +1,24 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " A ",
+        " A ",
+        "BCB"
+    ],
+    "key": {
+        "A": {
+            "type": "forge:ore_dict",
+            "ore": "ingotIron"
+        },
+        "B": {
+            "type": "forge:ore_dict",
+            "ore": "dustRedstone"
+        },
+        "C": {
+            "item": "minecraft:redstone_torch"
+        }
+    },
+    "result": {
+        "item": "ivremotecontrol:basic_antenna"
+    }
+}

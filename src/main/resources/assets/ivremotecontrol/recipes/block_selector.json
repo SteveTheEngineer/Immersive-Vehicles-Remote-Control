@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "AB",
+        "CC"
+    ],
+    "key": {
+        "A": {
+            "item": "minecraft:compass"
+        },
+        "B": {
+            "type": "forge:ore_dict",
+            "ore": "dustRedstone"
+        },
+        "C": {
+            "type": "forge:ore_dict",
+            "ore": "stone"
+        }
+    },
+    "result": {
+        "item": "ivremotecontrol:block_selector"
+    }
+}

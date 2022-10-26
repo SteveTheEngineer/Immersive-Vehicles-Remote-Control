@@ -1,15 +1,17 @@
 package me.ste.ivremotecontrol.listener
 
-import me.ste.ivremotecontrol.block.decorinterface.DecorInterfaceBlock
-import me.ste.ivremotecontrol.block.decorinterface.DecorInterfaceTileEntity
-import me.ste.ivremotecontrol.block.fluidloaderinterface.FluidLoaderInterfaceBlock
-import me.ste.ivremotecontrol.block.fluidloaderinterface.FluidLoaderInterfaceTileEntity
-import me.ste.ivremotecontrol.block.fuelpumpinterface.FuelPumpInterfaceBlock
-import me.ste.ivremotecontrol.block.fuelpumpinterface.FuelPumpInterfaceTileEntity
-import me.ste.ivremotecontrol.block.signalcontrollerinterface.SignalControllerInterfaceBlock
-import me.ste.ivremotecontrol.block.signalcontrollerinterface.SignalControllerInterfaceTileEntity
-import me.ste.ivremotecontrol.block.vehicleremoteinterface.VehicleRemoteInterfaceBlock
-import me.ste.ivremotecontrol.block.vehicleremoteinterface.VehicleRemoteInterfaceTileEntity
+import me.ste.ivremotecontrol.block.antenna.AntennaBlock
+import me.ste.ivremotecontrol.block.iface.decorinterface.DecorInterfaceBlock
+import me.ste.ivremotecontrol.block.iface.decorinterface.DecorInterfaceTileEntity
+import me.ste.ivremotecontrol.block.iface.fluidloaderinterface.FluidLoaderInterfaceBlock
+import me.ste.ivremotecontrol.block.iface.fluidloaderinterface.FluidLoaderInterfaceTileEntity
+import me.ste.ivremotecontrol.block.iface.fuelpumpinterface.FuelPumpInterfaceBlock
+import me.ste.ivremotecontrol.block.iface.fuelpumpinterface.FuelPumpInterfaceTileEntity
+import me.ste.ivremotecontrol.block.iface.signalcontrollerinterface.SignalControllerInterfaceBlock
+import me.ste.ivremotecontrol.block.iface.signalcontrollerinterface.SignalControllerInterfaceTileEntity
+import me.ste.ivremotecontrol.block.iface.vehicleremoteinterface.VehicleRemoteInterfaceBlock
+import me.ste.ivremotecontrol.block.iface.vehicleremoteinterface.VehicleRemoteInterfaceTileEntity
+import me.ste.ivremotecontrol.item.BlockSelectorItem
 import me.ste.ivremotecontrol.item.VehicleSelectorItem
 import net.minecraft.block.Block
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
@@ -25,15 +27,23 @@ object RegistryListener {
     fun onItemRegistry(event: RegistryEvent.Register<Item>) {
         // Register the mod's items
         event.registry.registerAll(
-            // Regular items
-            VehicleSelectorItem,
+                // Regular items
+                VehicleSelectorItem,
+                BlockSelectorItem,
 
-            // Block items
-            VehicleRemoteInterfaceBlock.ITEM,
-            DecorInterfaceBlock.ITEM,
-            FluidLoaderInterfaceBlock.ITEM,
-            FuelPumpInterfaceBlock.ITEM,
-            SignalControllerInterfaceBlock.ITEM
+                // Block items
+                VehicleRemoteInterfaceBlock.ITEM,
+                DecorInterfaceBlock.ITEM,
+                FluidLoaderInterfaceBlock.ITEM,
+                FuelPumpInterfaceBlock.ITEM,
+                SignalControllerInterfaceBlock.ITEM,
+
+                // Antenna
+                AntennaBlock.BASIC.item,
+                AntennaBlock.ADVANCED.item,
+                AntennaBlock.ELITE.item,
+                AntennaBlock.ULTIMATE.item,
+                AntennaBlock.CREATIVE.item
         )
     }
 
@@ -41,33 +51,40 @@ object RegistryListener {
     fun onBlockRegistry(event: RegistryEvent.Register<Block>) {
         // Register the mod's blocks
         event.registry.registerAll(
-            VehicleRemoteInterfaceBlock,
-            DecorInterfaceBlock,
-            FluidLoaderInterfaceBlock,
-            FuelPumpInterfaceBlock,
-            SignalControllerInterfaceBlock
+                VehicleRemoteInterfaceBlock,
+                DecorInterfaceBlock,
+                FluidLoaderInterfaceBlock,
+                FuelPumpInterfaceBlock,
+                SignalControllerInterfaceBlock,
+
+                // Antenna
+                AntennaBlock.BASIC,
+                AntennaBlock.ADVANCED,
+                AntennaBlock.ELITE,
+                AntennaBlock.ULTIMATE,
+                AntennaBlock.CREATIVE
         )
 
         // Register the tile entities
         GameRegistry.registerTileEntity(
-            VehicleRemoteInterfaceTileEntity::class.java,
-            VehicleRemoteInterfaceBlock.registryName
+                VehicleRemoteInterfaceTileEntity::class.java,
+                VehicleRemoteInterfaceBlock.registryName
         )
         GameRegistry.registerTileEntity(
-            DecorInterfaceTileEntity::class.java,
-            DecorInterfaceBlock.registryName
+                DecorInterfaceTileEntity::class.java,
+                DecorInterfaceBlock.registryName
         )
         GameRegistry.registerTileEntity(
-            FluidLoaderInterfaceTileEntity::class.java,
-            FluidLoaderInterfaceBlock.registryName
+                FluidLoaderInterfaceTileEntity::class.java,
+                FluidLoaderInterfaceBlock.registryName
         )
         GameRegistry.registerTileEntity(
-            FuelPumpInterfaceTileEntity::class.java,
-            FuelPumpInterfaceBlock.registryName
+                FuelPumpInterfaceTileEntity::class.java,
+                FuelPumpInterfaceBlock.registryName
         )
         GameRegistry.registerTileEntity(
-            SignalControllerInterfaceTileEntity::class.java,
-            SignalControllerInterfaceBlock.registryName
+                SignalControllerInterfaceTileEntity::class.java,
+                SignalControllerInterfaceBlock.registryName
         )
     }
 
@@ -75,6 +92,7 @@ object RegistryListener {
     fun onModelRegistry(event: ModelRegistryEvent) {
         // Regular items
         this.addModelLocation(VehicleSelectorItem)
+        this.addModelLocation(BlockSelectorItem)
 
         // Block items
         this.addModelLocation(VehicleRemoteInterfaceBlock.ITEM)
@@ -82,6 +100,13 @@ object RegistryListener {
         this.addModelLocation(FluidLoaderInterfaceBlock.ITEM)
         this.addModelLocation(FuelPumpInterfaceBlock.ITEM)
         this.addModelLocation(SignalControllerInterfaceBlock.ITEM)
+
+        // Antenna
+        this.addModelLocation(AntennaBlock.BASIC.item)
+        this.addModelLocation(AntennaBlock.ADVANCED.item)
+        this.addModelLocation(AntennaBlock.ELITE.item)
+        this.addModelLocation(AntennaBlock.ULTIMATE.item)
+        this.addModelLocation(AntennaBlock.CREATIVE.item)
     }
 
     private fun addModelLocation(item: Item) =

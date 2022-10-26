@@ -18,8 +18,8 @@
             "item": "minecraft:piston"
         },
         "D": {
-            "item": "computercraft:cable",
-            "data": 0
+            "type": "forge:ore_dict",
+            "ore": "dustRedstone"
         }
     },
     "result": {

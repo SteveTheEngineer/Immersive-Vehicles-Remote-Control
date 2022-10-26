@@ -1,15 +1,36 @@
 itemGroup.ivremotecontrol:tab=Immersive Vehicles Remote Control
 
-item.ivremotecontrol:vehicle_selector.unbound.name=Vehicle Selection Tool
-item.ivremotecontrol:vehicle_selector.bound.name=Vehicle Selection Tool (Bound)
-item.ivremotecontrol:vehicle_selector.tooltip.help0=Right click on a vehicle to bind
-item.ivremotecontrol:vehicle_selector.tooltip.help1=Sneak and right click to unbind
-item.ivremotecontrol:vehicle_selector.tooltip.uuid=Bound vehicle UUID: %s
+item.ivremotecontrol:vehicle_selector.unbound.name=Vehicle Selector
+item.ivremotecontrol:vehicle_selector.bound.name=Vehicle Selector (Bound)
+item.ivremotecontrol:vehicle_selector.tooltip.help0=Right click on a vehicle to save it's ID
+item.ivremotecontrol:vehicle_selector.tooltip.help1=Sneak and right click on air to clear
+item.ivremotecontrol:vehicle_selector.tooltip.uuid=Stored ID: %s
+
+item.ivremotecontrol:block_selector.unbound.name=Block Selector
+item.ivremotecontrol:block_selector.bound.name=Block Selector (Bound)
+item.ivremotecontrol:block_selector.tooltip.help0=Right click on a block to save it's location
+item.ivremotecontrol:block_selector.tooltip.help1=Sneak and right click on air to clear
+item.ivremotecontrol:block_selector.tooltip.block=Stored location: X %s, Y %s, Z %s. (DIM %s)
 
 chat.ivremotecontrol:vehicle_selector.select_failed=You are not the owner of that vehicle!
 
-tile.ivremotecontrol:vehicle_remote_controller.name=Vehicle Remote Interface
+tile.ivremotecontrol:vehicle_remote_controller.name=Vehicle Interface
 tile.ivremotecontrol:fuel_pump_interface.name=Fuel Pump Interface
 tile.ivremotecontrol:fluid_loader_interface.name=Fluid Loader Interface
 tile.ivremotecontrol:signal_controller_interface.name=Signal Controller Interface
 tile.ivremotecontrol:decor_interface.name=Decor Interface
+
+tile.ivremotecontrol:basic_antenna.name=Basic Antenna
+tile.ivremotecontrol:advanced_antenna.name=Advanced Antenna
+tile.ivremotecontrol:elite_antenna.name=Elite Antenna
+tile.ivremotecontrol:ultimate_antenna.name=Ultimate Antenna
+tile.ivremotecontrol:creative_antenna.name=Creative Antenna
+
+ivremotecontrol.antenna.tooltip.range=Range: %s blocks
+ivremotecontrol.antenna.tooltip.help0=Place on the front/white side of an interface
+
+ivremotecontrol.interface.tooltip.help0=Requires an antenna to operate
+
+ivremotecontrol.interfaceGui.problems.antennaMissing=! Missing antenna.
+ivremotecontrol.interfaceGui.problems.selectorMissing.vehicle=! No vehicle selectors present.
+ivremotecontrol.interfaceGui.problems.selectorMissing.block=! No block selectors present.

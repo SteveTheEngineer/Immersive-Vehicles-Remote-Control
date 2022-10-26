@@ -1,8 +1,34 @@
 {
     "forge_marker": 1,
+    "defaults": {
+        "textures": {
+            "0": "ivremotecontrol:blocks/vehicle_interface",
+            "particle": "ivremotecontrol:blocks/vehicle_interface"
+        },
+        "model": "ivremotecontrol:vehicle_interface"
+    },
     "variants": {
-        "normal": {
-            "model": "ivremotecontrol:vehicle_remote_controller"
+        "facing": {
+            "down": {
+                "x": 180
+            },
+            "up": {
+            },
+            "north": {
+                "x": 90
+            },
+            "south": {
+                "x": 90,
+                "y": 180
+            },
+            "west": {
+                "x": 90,
+                "y": -90
+            },
+            "east": {
+                "x": 90,
+                "y": 90
+            }
         }
     }
 }

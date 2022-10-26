@@ -1,3 +1,6 @@
 {
-    "parent": "ivremotecontrol:block/vehicle_remote_controller"
+    "parent": "ivremotecontrol:block/vehicle_interface",
+    "textures": {
+        "0": "ivremotecontrol:blocks/vehicle_interface"
+    }
 }

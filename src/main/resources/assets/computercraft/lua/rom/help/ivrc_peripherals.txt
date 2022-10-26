@@ -5,3 +5,30 @@ Type "help ivrc_fluidloader" to learn about using Fluid Loader Interfaces.
 Type "help ivrc_fuelpump" to learn about using Fuel Pump Interfaces.
 Type "help ivrc_signalcontroller" to learn about using Signal Controller Interfaces.
 Type "help ivrc_vehicle" to learn about using Vehicle Remote Interfaces.
+
+Methods shared by all interfaces:
+getSlot(): integer
+- Get the currently selected interface slot. Range 0-8, inclusive.
+
+setSlot(slot: integer)
+- Set the selected slot. Range 0-8, inclusive.
+
+getUsedSlots(): table{integer}
+- Get the slots that currently have a selector.
+
+getSelectedVehicleIds(): string, string
+- Get the entity and the vehicle UUID stored in the selector.
+- If selector is unbound, returns ("", "").
+- Only available on the vehicle interface.
+
+getSelectedBlockPos(): integer, integer, integer, integer
+- Get the X, Y, Z and dimension ID stored in the selector.
+- If selector is unbound, returns (), or nothing.
+- Only available on non-vehicle interfaces.
+
+getMaxRange(): double
+- Get the maximum distance between the antenna and the target vehicle or block until signal cuts off.
+
+getAntennaType(): string
+- Get the registry name of the currently installed antenna.
+- If there is no antenna, returns "".

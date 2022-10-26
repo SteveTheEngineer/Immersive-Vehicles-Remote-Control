@@ -11,15 +11,16 @@
             "ore": "ingotIron"
         },
         "B": {
-            "item": "minecraft:ender_pearl"
+            "type": "forge:ore_dict",
+            "ore": "enderpearl"
         },
         "C": {
             "type": "forge:ore_dict",
             "ore": "dustRedstone"
         },
         "D": {
-            "item": "computercraft:cable",
-            "data": 0
+            "type": "forge:ore_dict",
+            "ore": "dustRedstone"
         },
         "E": {
             "type": "forge:ore_dict",

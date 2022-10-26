@@ -1,8 +1,8 @@
 package me.ste.ivremotecontrol
 
-import me.ste.ivremotecontrol.block.vehicleremoteinterface.VehicleRemoteInterfaceContainer
-import me.ste.ivremotecontrol.block.vehicleremoteinterface.VehicleRemoteInterfaceGUI
-import me.ste.ivremotecontrol.block.vehicleremoteinterface.VehicleRemoteInterfaceTileEntity
+import me.ste.ivremotecontrol.block.iface.base.InterfaceTileEntity
+import me.ste.ivremotecontrol.block.iface.base.gui.InterfaceContainer
+import me.ste.ivremotecontrol.block.iface.base.gui.InterfaceGUI
 import net.minecraft.client.gui.Gui
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.Container
@@ -16,25 +16,47 @@ object IVRCGuiHandler : IGuiHandler {
                 (id: Int, player: EntityPlayer, world: World, x: Int, y: Int, z: Int) -> Gui>
             > = ArrayList()
 
-    val VEHICLE_REMOTE_CONTROLLER = this.registerGui(
-        { _, player, world, x, y, z ->
-            VehicleRemoteInterfaceContainer(
-                player.inventory,
-                world.getTileEntity(BlockPos(x, y, z)) as VehicleRemoteInterfaceTileEntity
-            )
-        },
-        { id, player, world, x, y, z ->
-            VehicleRemoteInterfaceGUI(
-                this.getServerGuiElement(
-                    id,
-                    player,
-                    world,
-                    x,
-                    y,
-                    z
-                )!!, player.inventory
-            )
-        })
+    val VEHICLE_INTERFACE = this.registerGui(
+            { _, player, world, x, y, z ->
+                InterfaceContainer(
+                        player.inventory,
+                        world.getTileEntity(BlockPos(x, y, z)) as InterfaceTileEntity
+                )
+            },
+            { id, player, world, x, y, z ->
+                InterfaceGUI(
+                        this.getServerGuiElement(
+                                id,
+                                player,
+                                world,
+                                x,
+                                y,
+                                z
+                        )!!, player.inventory,
+                        false
+                )
+            })
+
+    val BLOCK_INTERFACE = this.registerGui(
+            { _, player, world, x, y, z ->
+                InterfaceContainer(
+                        player.inventory,
+                        world.getTileEntity(BlockPos(x, y, z)) as InterfaceTileEntity
+                )
+            },
+            { id, player, world, x, y, z ->
+                InterfaceGUI(
+                        this.getServerGuiElement(
+                                id,
+                                player,
+                                world,
+                                x,
+                                y,
+                                z
+                        )!!, player.inventory,
+                        true
+                )
+            })
 
     override fun getServerGuiElement(
         id: Int,

@@ -1,8 +1,6 @@
 {
-    "parent": "minecraft:block/cube_bottom_top",
+    "parent": "ivremotecontrol:block/block_interface",
     "textures": {
-        "top": "ivremotecontrol:blocks/signal_controller_interface/front",
-        "side": "ivremotecontrol:blocks/signal_controller_interface/side",
-        "bottom": "ivremotecontrol:blocks/signal_controller_interface/back"
+        "0": "ivremotecontrol:blocks/signal_controller_interface"
     }
 }

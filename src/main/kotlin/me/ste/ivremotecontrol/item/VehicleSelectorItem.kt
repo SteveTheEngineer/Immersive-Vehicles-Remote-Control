@@ -1,7 +1,7 @@
 package me.ste.ivremotecontrol.item
 
 import me.ste.ivremotecontrol.IVRemoteControl
-import me.ste.ivremotecontrol.constants.IVRCConfiguration
+import me.ste.ivremotecontrol.IVRCConfiguration
 import me.ste.ivremotecontrol.tab.IVRCCreativeTab
 import net.minecraft.client.resources.I18n
 import net.minecraft.client.util.ITooltipFlag
