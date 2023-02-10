@@ -25,7 +25,7 @@ import java.util.jar.JarFile
 object IVRemoteControl {
     // Constants
     const val MOD_ID = "ivremotecontrol"
-    const val MTS_VERSION = "22.3.0"
+    const val MTS_VERSION = "22.6.0"
     const val FLAP_STEP: Short = 50
 
     // Mod support states
@@ -39,7 +39,7 @@ object IVRemoteControl {
     val LOGGER = LogManager.getLogger()
 
     @Mod.EventHandler
-    fun preInit(event: FMLPreInitializationEvent) { // TODO abstract out CC
+    fun preInit(event: FMLPreInitializationEvent) {
         // Make sure that the version of MTS is compatible
         val mtsModContainer = Loader.instance().indexedModList["mts"] ?: throw IllegalStateException("Immersive Vehicles (Minecraft Transport Simulator) is required for this mod to run. Please install SPECIFICALLY version $MTS_VERSION.")
         if (mtsModContainer.version != MTS_VERSION) {

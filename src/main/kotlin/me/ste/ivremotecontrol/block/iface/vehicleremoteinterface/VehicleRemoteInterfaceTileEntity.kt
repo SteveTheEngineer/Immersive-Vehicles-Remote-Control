@@ -161,14 +161,14 @@ class VehicleRemoteInterfaceTileEntity : InterfaceTileEntity("vehicle") {
                 "hasBrokenStarter" to false, // Probably completely removed from the mod
                 "currentGear" to engine.currentGear,
                 "fuelFlow" to engine.fuelFlow,
-                "hasFuelLeak" to engine.fuelLeak,
+                "hasFuelLeak" to false,
                 "hasBackfired" to engine.backfired,
                 "isBadShift" to engine.badShift,
                 "downshiftCountdown" to engine.downshiftCountdown,
                 "hours" to engine.hours,
                 "isCreative" to vehicle.isCreative,
                 "hasLinkedEngine" to (engine.linkedEngine != null),
-                "hasOilLeak" to engine.oilLeak,
+                "hasOilLeak" to false,
                 "pressure" to engine.pressure,
                 "propellerGearboxRatio" to engine.propellerGearboxRatio,
                 "reverseGears" to engine.reverseGears,
@@ -440,11 +440,7 @@ class VehicleRemoteInterfaceTileEntity : InterfaceTileEntity("vehicle") {
             return null
         }
 
-        if (value) {
-            this.setVariable(vehicle, AUTOPILOT_VARIABLE, if (motorized.isAircraft) vehicle.position.y else vehicle.velocity)
-        } else {
-            this.setVariable(vehicle, AUTOPILOT_VARIABLE, 0.0)
-        }
+        this.setVariable(vehicle, AUTOPILOT_ACTIVE_VARIABLE, value);
 
         return null
     }
@@ -556,6 +552,7 @@ class VehicleRemoteInterfaceTileEntity : InterfaceTileEntity("vehicle") {
         val vehicle = this.getVehicle() ?: return null
 
         this.setVariable(vehicle, GEAR_VARIABLE, value)
+
         return null
     }
 
@@ -603,7 +600,7 @@ class VehicleRemoteInterfaceTileEntity : InterfaceTileEntity("vehicle") {
     @Deprecated("Use getAutopilotState instead")
     private fun isAutopilotActive(ctx: CallContext): Array<Any?>? {
         val vehicle = this.getVehicle() ?: return null
-        return arrayOf(vehicle.isVariableActive(AUTOPILOT_VARIABLE))
+        return arrayOf(vehicle.isVariableActive(AUTOPILOT_ACTIVE_VARIABLE))
     }
 
     @Deprecated("Removed")

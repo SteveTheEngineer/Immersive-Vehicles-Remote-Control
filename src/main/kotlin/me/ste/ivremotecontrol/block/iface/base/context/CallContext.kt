@@ -5,6 +5,5 @@ interface CallContext {
     fun getString(index: Int): String
     fun getBoolean(index: Int): Boolean
     fun getDouble(index: Int): Double
-
     fun badArgument(index: Int, expected: String, got: String): Throwable
 }

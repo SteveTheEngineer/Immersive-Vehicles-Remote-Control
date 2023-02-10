@@ -19,7 +19,7 @@ apply plugin: "net.minecraftforge.gradle.forge"
 apply plugin: "kotlin"
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
-version = "2.8"
+version = "2.9"
 group = "me.ste" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "IVRemoteControl"
 
@@ -92,7 +92,7 @@ dependencies {
     deobfCompile "net.shadowfacts:Forgelin:1.8.4"
     deobfCompile "org.squiddev:cc-tweaked-1.12.2:1.89.2"
     deobfCompile "li.cil.oc:OpenComputers:MC1.12.2-1.7.5.221"
-    deobfCompile "curse.maven:minecraft-transport-simulator-286703:4035086"
+    deobfCompile "curse.maven:minecraft-transport-simulator-286703:4384845"
 
     runtime "mezz.jei:jei_1.12.2:4.16.1.302"
 }
